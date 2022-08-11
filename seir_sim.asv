@@ -1,0 +1,74 @@
+
+function [S,E,I,Sm,Em,Im,R,D,V,Vp,Ip,N,SS,EE,II,phi_S,phi_Sm,lambda,lambda_m] = seir_sim(eta_s,eta_i, ...
+    sigma_Vm_max,sigma_V_max,c,beta,epsilon,gamma, ...
+    mu,a,f,freq_i,b1,timeDay,tau, S,E,I,Sm,Em,Im,R,D,V,Vp,Ip,dt,noise, ...
+    phi_SMult,phi_EMult,phi_IMult,phi_SmMult,phi_EmMult,phi_ImMult )
+
+
+phi_S = a_s*cos(omega_s*timeDay)+f_s*cos(omega_s*timeDay)+b_s*cos(omega_s*timeDay);
+phi_E = a_e*cos(omega_e*timeDay)+f_e*cos(omega_e*timeDay)+b_e*cos(omega_e*timeDay);
+phi_I = a_i*cos(omega_i*timeDay)+f_i*cos(omega_i*timeDay)+b_i*cos(omega_i*timeDay);
+phi_Sm = a_sm*cos(omega_sm*timeDay)+f_sm*cos(omega_sm*timeDay)+b_sm*cos(omega_sm*timeDay);
+phi_Em = a_em*cos(omega_em*timeDay)+f_em*cos(omega_em*timeDay)+b_em*cos(omega_em*timeDay);
+phi_Im = a_im*cos(omega_im*timeDay)+f_im*cos(omega_im*timeDay)+b_im*cos(omega_s*timeDay);
+n = 100;
+Dt = dt/n;
+
+DW_S=randn(1,n)*sqrt(Dt)*noise;
+DW_E=randn(1,n)*sqrt(Dt)*noise;
+DW_I=randn(1,n)*sqrt(Dt)*noise;
+DW_Sm=randn(1,n)*sqrt(Dt)*noise;
+DW_Em=randn(1,n)*sqrt(Dt)*noise;
+DW_Im=randn(1,n)*sqrt(Dt)*noise;
+DW_R=randn(1,n)*sqrt(Dt)*noise;
+DW_D=randn(1,n)*sqrt(Dt)*noise;
+DW_V=randn(1,n)*sqrt(Dt)*noise;
+DW_Vp=randn(1,n)*sqrt(Dt)*noise;
+DW_Ip=randn(1,n)*sqrt(Dt)*noise;
+for i = 1:n
+
+    N = S+E+I+Sm+Em+Im+R+D+V;
+    lambda = (beta/N)*(I+(1-eta_i)*Im);
+    lambda_m = (beta/N)*(1-eta_s)*(I+(1-eta_i)*Im);
+
+    dS = (-(phi_Sm + lambda + alpha)*S + sigma_S*V + kappa_R * R + phi_S*S_m)*Dt;
+    dSm = (-(phi_S + lambda_m + eta_Sh +  alpha)*S_m + sigma_Vm*V + eta_S*Sh+ kappa_Rm * R + phi_Sm*S)*Dt;
+    dSh = (-(eta_Sm+lambda_h+alpha)*S_h + eta_Sh*S_m+sigma_Sh*V + kappa_Rh*R)*Dt;
+
+    dE = -((epsilon+phi_Em)*E+lambda*S+phi_E*S)*Dt;
+    dEm = -((eta_Eh+epsilon+phi_E)*E_m + eta_Em * E_h + lambda_m*S_m + sigma_Em *E)*Dt;
+    dEh = -((epsilon + eta_Em)*Eh + lambda_h*Sh+eta_Eh*Em)*Dt;
+    
+    dI = -((phi_Im+mu+gamma)*I+phi_I*Im+epsilon*E)*Dt;
+    dIm = -((phi_I+gamma+mu+eta_Ih)*Im+epsilon*Em+phi_Im*I+eta_Im*Ih)*Dt;
+    dIh = -((mu + gamma + eta_Im)*Ih + epsilon*Eh+eta_Ih*Im)*Dt;
+
+    dR = -((kappa_R+kappa_Rm+kappa_Rh)*R+(I + Im + Ih)*gamma)*Dt;
+    dD = ((I+Im+Ih)*mu)*Dt;
+    dV = -((sigma_S+sigma_Sm+sigma_Sh)*V+(S+Sh+Sm)*alpha)*Dt;
+
+    S = S + dS  ;
+    Sm = Sm + dSm;
+    Sh = Sh + dSh;
+
+    E = E + dE  ;
+    Em = Em + dEm  ;
+    Eh = Eh + dEh  ;
+
+    I = I + dI  ;
+    Im = Im + dIm  ;
+    Ih = Ih+ dIh  ;
+
+
+    
+    R = R + dR  ;
+    D = D + dD  ;
+    V = V + dV  ;
+
+    Vp = Vp + dVp  ;
+
+    SS = S+Sm+Sh;
+    EE = E+Em+Eh;
+    II = I+Im+Ih;
+end
+end
