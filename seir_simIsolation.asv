@@ -1,5 +1,4 @@
-
-function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,V,Vp,N,phi_1,phi_2,eta_1,eta_2,lambda,lambda_m,lambda_h,alpha] ...
+function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,phi_1,phi_2,eta_1,eta_2,lambda,lambda_m,lambda_h,alpha] ...
     = seir_simIsolation( ...
     S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,a1,a2,b1,b2, ...
     Omega1,Omega2,Theta1,Theta2,zeta1,zeta2,psi1,psi2, ...
@@ -36,9 +35,9 @@ phi_I = phi_2;
 eta_Sh = eta_1;
 eta_Eh = eta_1;
 eta_Ih = eta_1;
-eta_Sm = eta_2;
-eta_Em = eta_2;
-eta_Im = eta_2;
+eta_S = eta_2;
+eta_E = eta_2;
+eta_I = eta_2;
 
 k = 1e5;
 alpha = c/(1+exp(-k*(timeDay-t0)));
@@ -93,7 +92,7 @@ lambda_m = 0;
 lambda_h = 0;
 for i = 1:n
 
-    N = S+E+I+Sm+Em+Im+Sh+Eh+Ih+R+D+V;
+    N = S+E+I+Sm+Em+Im+Sh+Eh+Ih+R+D+U;
     lambda = (beta/N)*(I+Ih+(1-eta_i)*Im);
     lambda_m = (beta/N)*(1-eta_s)*(I+Ih+(1-eta_i)*Im);
     lambda_h = (beta/N)*(1-eta_h)*(I+Ih+(1-eta_i)*Im);
@@ -104,15 +103,15 @@ for i = 1:n
 
     dE = (-(epsilon + phi_Em + eta_Eh)*E + eta_E * Eh + phi_E * Em + lambda*S )*Dt;
     dEm = (-(epsilon + phi_E) * Em + phi_Em*E + lambda_m* Sm)*Dt;
-    dEh = (-(epsilon + eta_E)*Eh + lambda_h * S_h + eta_Eh * E)*Dt;
+    dEh = (-(epsilon + eta_E)*Eh + lambda_h * Sh + eta_Eh * E)*Dt;
 
     dI = (-(mu + gamma + eta_Ih + phi_Im)*I + epsilon*E + phi_I* Im + eta_I *Ih)*Dt;
     dIm = (-(phi_I + gamma + mu)*Im + phi_Im*I + epsilon*Em)*Dt;
-    dIh = (-(eta_I + gamma + mu)*Ih + epsilon*Eh + et)*Dt;
+    dIh = (-(eta_I + gamma + mu)*Ih + epsilon*Eh + eta_Ih*I)*Dt;
 
     dR = (-(kappa_R+kappa_Rm+kappa_Rh)*R+(I + Im + Ih)*gamma)*Dt;
     dD = ((I+Im+Ih)*mu)*Dt;
-    dV = (-(sigma_S+sigma_Sm+sigma_Sh)*V+(S+Sh+Sm)*alpha)*Dt;
+    dU = (-(sigma_S+sigma_Sm+sigma_Sh)*U+(S+Sh+Sm)*alpha)*Dt;
 
     dVp = ((S+Sh+Sm)*alpha)*Dt;
 
@@ -132,7 +131,7 @@ for i = 1:n
 
     R = R + dR  ;
     D = D + dD  ;
-    V = V + dV  ;
+    U = U + dU  ;
 
     Vp = Vp + dVp  ;
 

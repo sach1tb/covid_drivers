@@ -1,8 +1,8 @@
 clear all
 %close all
 %clc
-global infectious death vax mask maxT numTerms mobility magedExposed weights
-maxT = 1000; %maximum is 1000
+global infectious death vax mask maxT numTerms mobility magedExposed
+maxT = 700; %maximum is 1000
 infectious = readmatrix('infectiousIllinois.csv');
 infectious(isnan(infectious))=0;
 infectious = infectious*(9.7/12.8);
@@ -33,39 +33,39 @@ mask =  mask(1:maxT);
 mobility =  mobility(1:maxT);
 
 
-weights = [1.0, 0.0, 0, 0];
-numTerms = 3;
-xmin=[0.01*ones(1,12*numTerms+5) 300 0.001 0.0001];
-xmax = [10.0*ones(1,12*numTerms) 1.0*ones(1,5)  1000  1 1];
-x0 = [0.01*(xmin(1:numel(xmin)-1)+xmax(1:numel(xmin)-1)) 300 0.1];
+
+numTerms = 1;
+xmin=0.0001*ones(1,12*numTerms+5);
+xmax = [10.0*ones(1,12*numTerms) 0.1*ones(1,5)];
+x0 = 0.01*(xmin+xmax);
 
 options = optimoptions('fmincon','Display','iter','MaxFunctionEvaluations',5000,'Algorithm','interior-point');
-xopt = fmincon(@objective,x0,[],[],[],[],xmin,xmax,@constraint,options);
+xopt = fmincon(@objective,x0,[],[],[],[],xmin,xmax,[],options);
 % ,[],[],[],[],[],[],[],[]
 xopt
 objective(xopt)
-plotResults(xopt,numTerms,maxT, weights)
+plotResults_magedFit(xopt,numTerms,maxT)
 
 function obj = objective(params)
-global infectious death mask vax maxT numTerms mobility magedExposed weights
+global infectious death mask vax maxT numTerms mobility magedExposed
 
 tspan = 0:1:maxT-1;
 dt = 1;
 
-S0 = 9.7e6-24;
+S0 = 1e6-50;
 Sm0 = 0;
 Sh0 = 0;
 E0 = 0;
 Em0 = 0;
 Eh0 = 0;
-I0 = 24;
+I0 = 50;
 Im0 =0 ;
 Ih0 = 0;
 R0 = 0;
 D0 = 0;
 U0 = 0;
 Vp0 = 0;
-N0 = 9.7e6;
+N0 = 1e6;
 
 x = [];
 x(1,1) = S0;
@@ -83,33 +83,51 @@ x(1,12) = U0 ;
 x(1,13) = Vp0;
 x(1,14) = N0;
 
-a1 = params(1+0*numTerms:1*numTerms);
-a2 = params(1+1*numTerms:2*numTerms);
-b1 = params(1+2*numTerms:3*numTerms);
-b2 = params(1+3*numTerms:4*numTerms);
+% a1 = params(1+0*numTerms:1*numTerms)*0;
+% a2 = params(1+1*numTerms:2*numTerms)*0;
+% b1 = params(1+2*numTerms:3*numTerms)*0;
+% b2 = params(1+3*numTerms:4*numTerms)*0;
+% 
+% Omega1 = params(1+4*numTerms:5*numTerms)*0;
+% Omega2 = params(1+5*numTerms:6*numTerms)*0;
+% Theta1 = params(1+6*numTerms:7*numTerms)*0;
+% Theta2 = params(1+7*numTerms:8*numTerms)*0;
+% zeta1 = params(1+8*numTerms:9*numTerms)*0;
+% zeta2 = params(1+9*numTerms:10*numTerms)*0;
+% psi1 = params(1+10*numTerms:11*numTerms)*0;
+% psi2 = params(1+11*numTerms:12*numTerms)*0;
+% sigma_Smax = params(12*numTerms+1)*0;
+% sigma_Sm_max= params(12*numTerms+2)*0;
+% sigma_Sh_max= params(12*numTerms+3)*0;
+% c= params(12*numTerms+4)*0;
 
-Omega1 = params(1+4*numTerms:5*numTerms);
-Omega2 = params(1+5*numTerms:6*numTerms);
-Theta1 = params(1+6*numTerms:7*numTerms);
-Theta2 = params(1+7*numTerms:8*numTerms);
-zeta1 = params(1+8*numTerms:9*numTerms);
-zeta2 = params(1+9*numTerms:10*numTerms);
-psi1 = params(1+10*numTerms:11*numTerms);
-psi2 = params(1+11*numTerms:12*numTerms);
-sigma_Smax = params(12*numTerms+1)*0;
-sigma_Sm_max= params(12*numTerms+2)*0;
-sigma_Sh_max= params(12*numTerms+3)*0;
-c= params(12*numTerms+4);
+a1 = 0;
+a2 = 0;
+b1 = 0;
+b2 = 0;
 
-mu = params(12*numTerms+8);
+Omega1 = 0;
+Omega2 = 0;
+Theta1 = 0;
+Theta2 = 0;
+zeta1 = 0;
+zeta2 = 0;
+psi1 = 0;
+psi2 = 0;
+sigma_Smax = 0;
+sigma_Sm_max= 0;
+sigma_Sh_max= 0;
+c= 0;
+eta_i= 0.45;
+
+mu = 3.5/100;
 gamma = 0.0602;
 epsilon = 1/4.5;
+beta = 0.312;
 
-eta_i= params(12*numTerms+5);
 eta_s = 0.35;
 eta_h = 0.45;
-t0 = params(12*numTerms+6);
-beta =  params(12*numTerms+7);
+t0 = 300;
 %kappa = 0*ones(1,numel(tspan));
 for k=1:numel(tspan)-1
 
@@ -121,12 +139,11 @@ for k=1:numel(tspan)-1
     % disp(k)
     [x(k+1,1), x(k+1,2), x(k+1,3), x(k+1,4), x(k+1,5), x(k+1,6), x(k+1,7), ...
         x(k+1,8), x(k+1,9),x(k+1,10), x(k+1,11), x(k+1,12), x(k+1,13), x(k+1,14)] = ...
-        seir_simIsolation(x(k,1), x(k,2), x(k,3), x(k,4), x(k,5), x(k,6), ...
+        seir_simIsolation_magedFit(x(k,1), x(k,2), x(k,3), x(k,4), x(k,5), x(k,6), ...
         x(k,7), x(k,8), x(k,9),x(k,10), x(k,11), x(k,12), x(k,13), x(k,14) ...
         ,a1,a2,b1,b2,Omega1,Omega2,Theta1,Theta2,zeta1,zeta2,psi1,psi2, ...
         sigma_Smax,sigma_Sm_max,sigma_Sh_max,c,mu,gamma,epsilon,beta,eta_i,eta_s,eta_h,t0,k,numTerms);
 end
-
 S= x(:,1);
 Sm= x(:,2);
 Sh= x(:,3);
@@ -140,7 +157,7 @@ R= x(:,10);
 D= x(:,11);
 U= x(:,12);
 Vp= x(:,13);
-N = 9.7e6;
+N = 1e6;
 
 obj1 = sum((D-death).^2)^0.5;
 obj2 = sum((Vp-vax).^2)^0.5;
@@ -151,8 +168,8 @@ obj4 = sum((maskedEstimated*N-maskedReference*N).^2)^0.5;
 estimatedMobility = -(Sh+Eh+Ih)./(S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+U+D);
 obj5 = sum((N*(estimatedMobility-mobility/100)).^2)^0.5;
 
-obj = weights(1)*obj1+weights(2)*obj2+weights(3)*obj3+weights(4)*obj4+0.1*obj5;
-%obj = sum((E+Em+Eh - magedExposed').^2)^0.5;
+obj = 0.35*obj1+0.35*obj2+0.1*obj3+0.1*obj4+0.1*obj5;
+obj = sum((E+Em+Eh - magedExposed').^2)^0.5;
 %obj = obj1*obj3;
 end
 
@@ -211,12 +228,11 @@ c= params(12*numTerms+4);
 mu = 3.5/100;
 gamma = 0.0602;
 epsilon = 1/4.5;
-
+beta = 0.312;
 eta_i= params(12*numTerms+5);
 eta_s = 0.35;
 eta_h = 0.45;
-t0 = params(12*numTerms+6);
-beta =  params(12*numTerms+7);
+t0 = 24;
 %kappa = 0*ones(1,numel(tspan));
 for k=1:numel(tspan)-1
 
@@ -251,4 +267,7 @@ c(11) = mean(lambda_h)-1;
 
 ceq = [];
 
+
+
 end
+
