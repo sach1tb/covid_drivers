@@ -1,56 +1,65 @@
-function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,phi_1,phi_2,xi_1,xi_2,lambda,lambda_m,lambda_h,alpha] ...
+function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,phi_Sm,phi_S,xi_Sh,xi_S,lambda,lambda_m,lambda_h,alpha] ...
     = seir_simIsolation( ...
-    S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,a1,a2,b1,b2, ...
-    Omega1,Omega2,Theta1,Theta2,zeta1,zeta2,psi1,psi2, ...
-    sigma_Smax,sigma_Sm_max,sigma_Sh_max,c,k,mu,gamma,epsilon,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,t0,timeDay,numTerms )
-% a1 = a1./(sum(a1));
-% a2 = a2./(sum(a2));
-% b1 = b1./(sum(b1));
-% b2 = b2./(sum(b2));
-phi_1 = a1(1);
-phi_2 = a2(1);
-xi_1 = b1(1);
-xi_2 = b2(1);
-
-% eta_Ih
-% eta_Im
-% eta_Sh
-% eta_Sm
-
-if(numTerms>1)
-    for ii = 1:numTerms-1
-%         phi_1 = phi_1 +(a1(ii+1)+a1(ii+1)*cos(Omega1(ii)*timeDay-Theta1(ii)))*0.5;
-%         phi_2 = phi_2 +(a2(ii+1)+a2(ii+1)*cos(Omega2(ii)*timeDay-Theta2(ii)))*0.5;
-% 
-%         eta_1 = eta_1 +(b1(ii+1)+b1(ii+1)*cos(zeta1(ii)*timeDay-psi1(ii)))*0.5;
-%         eta_2 = eta_2 +(b2(ii+1)+b2(ii+1)*cos(zeta2(ii)*timeDay-psi2(ii)))*0.5;
-
-        phi_1 = phi_1 +a1(ii+1)*cos(Omega1(ii)*timeDay-Theta1(ii));
-        phi_2 = phi_2 +a2(ii+1)*cos(Omega2(ii)*timeDay-Theta2(ii));
-
-        xi_1 = xi_1 +b1(ii+1)*cos(zeta1(ii)*timeDay-psi1(ii));
-        xi_2 = xi_2 +b2(ii+1)*cos(zeta2(ii)*timeDay-psi2(ii));
-    end
-end
+    S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,a1,a2,b1,b2,partT, ...
+    sigma_Smax,sigma_Sm_max,sigma_Sh_max,c,k,mu,gamma,epsilon,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,t0,timeDay,numParts )
 
 
-phi_Sm = phi_1;
-phi_Em = phi_1;
-phi_Im = phi_1;
-phi_S = phi_2;
-phi_E = phi_2;
-phi_I = phi_2;
+a11 = a1(1);
+a12 = a1(2);
+a13 = a1(3);
+a21 = a2(1);
+a22 = a2(2);
+a23 = a2(3);
+
+b11 = b1(1);
+b12 = b1(2);
+b13 = b1(3);
+b21 = b2(1);
+b22 = b2(2);
+b23 = b2(3);
+
+t1 = partT(1);
+t2 = partT(2);
+t3 = partT(3);
+syms t;
+phi_1 = piecewise((0<t)&(t<=t1),a11,(t1<t)&(t<=t2),a12,(t2<t)&(t<=t3),a13);
+phi_2 = piecewise((0<t)&(t<=t1),a21,(t1<t)&(t<=t2),a22,(t2<t)&(t<=t3),a23);
+xi_1 = piecewise((0<t)&(t<=t1),b11,(t1<t)&(t<=t2),b12,(t2<t)&(t<=t3),b13);
+xi_2 = piecewise((0<t)&(t<=t1),b21,(t1<t)&(t<=t2),b22,(t2<t)&(t<=t3),b23);
 
 
+phi_Sm = double(subs(phi_1,timeDay));
+phi_Em = double(subs(phi_1,timeDay));
+phi_Im = double(subs(phi_1,timeDay));
+phi_S = double(subs(phi_2,timeDay));
+phi_E = double(subs(phi_2,timeDay));
+phi_I = double(subs(phi_2,timeDay));
 
-xi_Sh = xi_1;
-xi_Eh = xi_1;
-xi_Ih = xi_1;
-xi_S = xi_2;
-xi_E = xi_2;
-xi_I = xi_2;
 
-%k = 1e5;
+xi_Sh = double(subs(xi_1,timeDay));
+xi_Eh = double(subs(xi_1,timeDay));
+xi_Ih = double(subs(xi_1,timeDay));
+xi_S = double(subs(xi_2,timeDay));
+xi_E = double(subs(xi_2,timeDay));
+xi_I = double(subs(xi_2,timeDay));
+
+% ,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,
+
+beta = piecewise((0<t)&(t<=t1),beta(1),(t1<t)&(t<=t2),beta(2),(t2<t)&(t<=t3),beta(3));
+beta = double(subs(beta,timeDay));
+
+eta_Ih = piecewise((0<t)&(t<=t1),eta_Ih(1),(t1<t)&(t<=t2),eta_Ih(2),(t2<t)&(t<=t3),eta_Ih(3));
+eta_Ih = double(subs(eta_Ih,timeDay));
+
+eta_Im = piecewise((0<t)&(t<=t1),eta_Im(1),(t1<t)&(t<=t2),eta_Im(2),(t2<t)&(t<=t3),eta_Im(3));
+eta_Im = double(subs(eta_Im,timeDay));
+
+eta_Sh = piecewise((0<t)&(t<=t1),eta_Sh(1),(t1<t)&(t<=t2),eta_Sh(2),(t2<t)&(t<=t3),eta_Sh(3));
+eta_Sh = double(subs(eta_Sh,timeDay));
+
+eta_Sm = piecewise((0<t)&(t<=t1),eta_Sm(1),(t1<t)&(t<=t2),eta_Sm(2),(t2<t)&(t<=t3),eta_Sm(3));
+eta_Sm = double(subs(eta_Sm,timeDay));
+
 alpha = c/(1+exp(-k*(timeDay-t0)));
 
 %% sigma_S
