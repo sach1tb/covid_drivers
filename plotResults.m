@@ -218,7 +218,7 @@ plot(phi2);
 plot(xi1);
 plot(xi2);
 
-legend('phi_1','phi_2','xi_1','xi_2')
+legend('\phi_1','\phi_2','\xi_1','\xi_2')
 % 𝑤_𝐷=0.35, 𝑤_𝐼=0.1, 𝑤_𝑈=0.35, 𝑤_𝐻=0.1,𝑤_𝑀=0.1 
 str = sprintf("w_D = %0.3f, w_I = %0.3f,w_U = %0.3f, w_H = %0.3f, w_M = %0.3f", ...
     weights(1),weights(2),weights(3),weights(4),weights(5));
