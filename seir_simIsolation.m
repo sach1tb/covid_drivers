@@ -1,7 +1,7 @@
 function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,phi_1,phi_2,xi_1,xi_2,lambda,lambda_m,lambda_h,alpha,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa_R,kappa_Rm,kappa_Rh] ...
     = seir_simIsolation( ...
     S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,phi_1,phi_2,xi_1,xi_2, ...
-    sigma_S,sigma_Sm,sigma_Sh,alpha,mu,gamma,epsilon,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa_R,kappa_Rm,kappa_Rh )
+    sigma_S,sigma_Sm,sigma_Sh,c,mu,gamma,epsilon,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa_R,kappa_Rm,kappa_Rh,dayCounter )
 
 
 
@@ -25,8 +25,8 @@ xi_I = xi_2;
 % kappa_R = sigma_S;
 % kappa_Rm = sigma_Sm;
 % kappa_Rh = sigma_Sh;
-
-
+kFactor = 0.05;
+alpha = c/(1+exp(-kFactor*(dayCounter-333)));
 
 n = 1000;
 Dt = 1/n;

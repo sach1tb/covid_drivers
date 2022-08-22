@@ -1,4 +1,5 @@
 function plotResultsConcatenated(params1, params2, params3, weights,part1,part2,part3,objective)
+close all
 param = [params1;params2;params3];
 parts=[part1(1), part1(end);part2(1), part2(end); part3(1), part3(end)];
 infectious = readmatrix('infectiousIllinois.csv');
@@ -78,7 +79,7 @@ xi_2= params(4);
 sigma_S= params(5);
 sigma_Sm= params(6);
 sigma_Sh= params(7);
-alpha= params(8);
+c= params(8);
 mu= params(9);
 gamma= params(10);
 epsilon= params(11);
@@ -102,7 +103,7 @@ for k=parts(run,1):parts(run,2)
     = seir_simIsolation( ...
     x(k,1), x(k,2), x(k,3), x(k,4), x(k,5), x(k,6), ...
         x(k,7), x(k,8), x(k,9),x(k,10), x(k,11), x(k,12), x(k,13), x(k,14),phi_1,phi_2,xi_1,xi_2, ...
-    sigma_S,sigma_Sm,sigma_Sh,alpha,mu,gamma,epsilon,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa_R,kappa_Rm, kappa_Rh );
+    sigma_S,sigma_Sm,sigma_Sh,c,mu,gamma,epsilon,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa_R,kappa_Rm, kappa_Rh,k );
 
 end
 

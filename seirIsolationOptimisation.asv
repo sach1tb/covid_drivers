@@ -46,11 +46,11 @@ deltaVariant = 332+151+1:332+151+153;
 omicronVariant = 332+151+153+1:1000;
 
 % 𝑤_𝐷=0.35, 𝑤_𝐼=0.1, 𝑤_𝑈=0.35, 𝑤_𝐻=0.1, 𝑤_𝑀=0.1 
-weights = [0.30, 0.2, 0.3, 0.1, 0.1];
+weights = [0.25, 0.3, 0.25, 0.2, 0.0];
 % weights = [0.35, 0.1, 0.35, 0.1, 00.1];
 numParts = 3;
 xmin=[0.0001*ones(1,8) 0.0001 0.0001 0.0001  0.001 0.001*ones(1,7)];
-xmax = [1.0*ones(1,8) 0.01 0.1 1 1.0 1*ones(1,7)];
+xmax = [1.0*ones(1,8) 0.006 0.1 1 1.0 1*ones(1,7)];
 
 % phi_1
 % phi_2
@@ -72,27 +72,9 @@ xmax = [1.0*ones(1,8) 0.01 0.1 1 1.0 1*ones(1,7)];
 % kappa_Rm
 % kappa_Rh ...19
 
-% x0 = 0.01*(xmin(1:numel(xmin))+xmax(1:numel(xmin)));
-x0 =[0.0334093116883648	0.000100000000000000	0.883632333755389 ...
-    0.638394824749586	0.204445550120683	0.00398370549320305 ...
-    0.000100000000000000	0.00276238063762399 ...
-    0.000165558383109743	0.100000000000000	0.311245339544135 ...
-    0.932802081022819	0.0680480998745700	0.963223381107490	...
-    0.839156884468624	0.401332688593568	0.799977066838738 ...	
-    0.00100000000000000	1];
-x1 = [1	0.705961434080331	0.294259587563625	1	0.000100000000000000	...
-    1	0.000100000000000000	0.000100000000000000	0.000100000000000000 ...
-    0.100000000000000	0.000100000000000000	1	0.00100000000000000 ...
-    0.00100000000000000	0.00100000000000000	0.00100000000000000 ...
-    0.00100000000000000	0.00100000000000000	0.00946664522173071];
-x2 = [0.000100000000000000	0.00379504767884131	0.000100000000000000	...
-    0.00797967618357940	0.000100000000000000	0.000100000000000000 ...
-    1	0.00227633460741759	0.000100000000000000	0.00412435537665440 ...
-    0.000100000000000000	1	0.00100000000000000	0.00100000000000000 ...
-    0.00100000000000000	1	0.00100000000000000	0.104472268472839 ...
-    0.00100000000000000];
-
-options = optimoptions('fmincon','Display','iter','MaxFunctionEvaluations',40000,'Algorithm','interior-point');
+x0 = 0.01*(xmin(1:numel(xmin))+xmax(1:numel(xmin)));
+x0 = 0.01*(xmin(1:numel(xmin))+xmax(1:numel(xmin)));
+options = optimoptions('fmincon','Display','iter','MaxFunctionEvaluations',40000,'Algorithm','sqp');
 
 %% Initialize variables #1
 
@@ -120,7 +102,7 @@ pause(5)
     = getSEIRIsolationEndValues( ...
     S0,Sm0,Sh0,E0,Em0,Eh0,I0,Im0,Ih0,R0,D0,U0,Vp0,N0,xopt1,initialInfection,400);
 
-xopt2 = fmincon(@objectiveDeltaVariant,x1,[],[],[],[],xmin,xmax,[],options);
+xopt2 = fmincon(@objectiveDeltaVariant,x0,[],[],[],[],xmin,xmax,[],options);
 disp('Objective 2')
 beep
 beep
@@ -129,12 +111,11 @@ pause(5)
     = getSEIRIsolationEndValues( ...
     S0,Sm0,Sh0,E0,Em0,Eh0,I0,Im0,Ih0,R0,D0,U0,Vp0,N0,xopt2,deltaVariant,400);
 
-xopt3 = fmincon(@objectiveOmicronVariant,x2,[],[],[],[],xmin,xmax,[],options);
+xopt3 = fmincon(@objectiveOmicronVariant,x0,[],[],[],[],xmin,xmax,[],options);
 disp('Objective 3')
 beep
 beep
 pause(5)
-
 plotResultsConcatenated(xopt1,xopt2,xopt3,weights,initialInfection,deltaVariant, omicronVariant,objective)
 
 %% Initial Infection
@@ -378,16 +359,16 @@ vvax = vax(duration);
 mmobility = mobility(duration);
 
 
-obj1 = sum((D/max(ddeath)-ddeath/max(ddeath)).^2)^0.5; %w_D
-obj3 = sum((Vp/max(vvax)-vvax/max(vvax)).^2)^0.5;  %w_U
-obj2 = sum(((I+Im+Ih)/max(iinfectious)-iinfectious/max(iinfectious)).^2)^0.5;  %w_I
+obj1 = sum((D/N-ddeath/N).^2)^0.5; %w_D
+obj3 = sum((Vp/N-vvax/N).^2)^0.5;  %w_U
+obj2 = sum(((I+Im+Ih)/N-iinfectious/N).^2)^0.5;  %w_I
 maskedEstimated = (Sm+Em+Im)./(S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+U+D);
 maskedReference = mmask;
 obj5 = sum((maskedEstimated-maskedReference).^2)^0.5; % w_M
 estimatedMobility = -(Sh+Eh+Ih)./(S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+U+D);
 obj4 = sum(((estimatedMobility-mmobility/100)).^2)^0.5; % w_H
 obj = weights(1)*obj1+weights(2)*obj2+weights(3)*obj3+weights(4)*obj4+weights(5)*obj5;
-% obj = max([obj1,obj2,obj3,obj4,obj5]);
+
 
 % obj1 = max(abs(D/N-ddeath/N)); %w_D
 % obj3 = max(abs(Vp/N-vvax/N));  %w_U

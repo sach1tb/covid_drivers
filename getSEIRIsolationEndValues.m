@@ -1,6 +1,6 @@
 function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N] ...
     = getSEIRIsolationEndValues( ...
-    S0,Sm0,Sh0,E0,Em0,Eh0,I0,Im0,Ih0,R0,D0,U0,Vp0,N0,params,infectionDuration)
+    S0,Sm0,Sh0,E0,Em0,Eh0,I0,Im0,Ih0,R0,D0,U0,Vp0,N0,params,infectionDuration,dayCounter)
 
 
 x = [];
@@ -26,7 +26,7 @@ xi_2= params(4);
 sigma_S= params(5);
 sigma_Sm= params(6);
 sigma_Sh= params(7);
-alpha= params(8);
+c= params(8);
 mu= params(9);
 gamma= params(10);
 epsilon= params(11);
@@ -47,7 +47,7 @@ for k=1:numel(infectionDuration)
     = seir_simIsolation( ...
     x(k,1), x(k,2), x(k,3), x(k,4), x(k,5), x(k,6), ...
         x(k,7), x(k,8), x(k,9),x(k,10), x(k,11), x(k,12), x(k,13), x(k,14),phi_1,phi_2,xi_1,xi_2, ...
-    sigma_S,sigma_Sm,sigma_Sh,alpha,mu,gamma,epsilon,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa_R,kappa_Rm, kappa_Rh );
+    sigma_S,sigma_Sm,sigma_Sh,c,mu,gamma,epsilon,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa_R,kappa_Rm, kappa_Rh,dayCounter );
 
 end
 
