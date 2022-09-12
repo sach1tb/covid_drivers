@@ -219,7 +219,7 @@ plot(1:size(xV,2),xV(7,:));
 hold on
 plot(1:size(xV,2),xV(8,:));
 plot(1:size(xV,2),xV(9,:));
-title('Exposed')
+title('Infectious')
 legend("\I","\I_m","\I_h");
 
 function [x_kp1] = seirDynamics(xk,dt)
