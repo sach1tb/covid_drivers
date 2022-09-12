@@ -100,9 +100,8 @@ end
 % end
 
 for jj = 1:n
+    %xV(jj,:)= smooth(xV(jj,:),7,'sgolay');
     xV(jj,:) = filloutliers(xV(jj,:),'nearest');
-    xV(jj,:)= smooth(xV(jj,:),14,'sgolay');
-    
 end
 
 % plot results
