@@ -1,14 +1,16 @@
 clearvars
+close all
 % addpath C:\Users\aruni\OneDrive - Northern Illinois University\NIUCourseWork\MEE697\part4\ConditionalEntropy\SEIR_withIsolation\src\boundedline\boundedline
 % addpath C:\Users\aruni\OneDrive - Northern Illinois University\NIUCourseWork\MEE697\part4\ConditionalEntropy\SEIR_withIsolation\src\boundedline\
 addpath('..\boundedline\boundedline')
 addpath('..\boundedline\Inpaint_nans')
 
+N=1002; 
 nc=13; np=19;
 n=nc+np;%number of state
-m = 5; %number of measurements
+m = 6; %number of measurements
 dt = 1;
-R=diag([1000,100,100,1,10]);        % covariance of measurement,%[infectious,death,vax,mask,mobility]
+R=diag([2000,100,1000,0.1,10,1000]);        % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
 %-- fmnincon optimal parameters
 beta0 = 0.5;
@@ -36,8 +38,8 @@ parameterInit = [beta0,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,xi_Sh0,xi_S0 ...
     alpha0,phi_Sm0,phi_S0,sigma_S0,sigma_Sm0,sigma_Sh0,kappa_R0,kappa_Rm0 ...
     kappa_Rh0, mu0, gamma0, epsilon0];
 
-sigmaLimitsMax = [9.7e6*ones(1,nc), 1.0*ones(1,np)];
-sigmaLimitsMin = [0*ones(1,nc), 0.0*ones(1,np)];
+sigmaLimitsMax = [9.7e6*ones(1,nc), 0.8*ones(1,np)];
+sigmaLimitsMin = [0*ones(1,nc), 0*ones(1,np)];
 
 Q=diag([1e-6*ones(1,nc), 0.1*parameterInit]); % covariance of process
 f=@(x) seirDynamics(x,dt);  % nonlinear state equations
@@ -47,7 +49,7 @@ s(1) = 9.7e6-24;% initial state
 s(7) = 24;
 x=s; %initial state          % initial state with noise
 P = Q;                        % initial state covraiance
-N=1002;                                     % total dynamic steps
+                                    % total dynamic steps
 xV = zeros(n,N);          %estmate        % allocate memory
 sV = zeros(n,N);          %actual
 zV = zeros(m,N);
@@ -77,8 +79,8 @@ vax = vax(1:maxT);
 infectious =  infectious(1:maxT);
 mask =  mask(1:maxT);
 mobility =  mobility(1:maxT);
-
-z = [infectious';death';vax';mask';mobility']; % measurments
+totPopulation = 9.7e6*ones(1,maxT)';
+z = [infectious';death';vax';mask';mobility';totPopulation']; % measurments
 
 pmat = zeros(n,n,maxT);
 
@@ -87,7 +89,8 @@ for k=1:N
     zV(:,k)  = zk;                             % save measurment
     [x, P] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax);            % ekf
     pmat(:,:,k) = P;
-    xV(:,k) = x;                            % save e                                                         stimate
+    xV(:,k) = x;                            % save estimate
+    disp(k);
 end
 
 % remove outliers
@@ -100,8 +103,8 @@ end
 % end
 
 for jj = 1:n
-    xV(jj,:) = filloutliers(xV(jj,:),'nearest');
-    xV(jj,:)= smooth(xV(jj,:),14,'sgolay');
+    xV(jj,:) = filloutliers(xV(jj,:),'linear');
+    xV(jj,:)= smooth(xV(jj,:),28,'sgolay');
     
 end
 
@@ -123,9 +126,9 @@ plot((xV(4,:)+xV(5,:)+xV(6,:)),'--')
 title('Exposed')
 
 subplot(3,3,3)
-plot(infectious,'-');
+plot(infectious,'-','Color','g');
 hold on
-plot(xV(7,:)+xV(8,:)+xV(9,:),'--')
+plot(xV(7,:)+xV(8,:)+xV(9,:),'--','Color','r','LineWidth',1.4)
 
 boundedline(1:size(xV,2),(xV(7,:)+xV(8,:)+xV(9,:)), sqrt(squeeze(pmat(7,7,:))))
 title('Infectious')
@@ -140,7 +143,7 @@ subplot(3,3,5)
 plot(death,'-');
 
 hold on
-plot(xV(11,:),'--')
+plot(xV(11,:),'--','Color','r')
 boundedline(1:size(xV,2),xV(11,:), sqrt(squeeze(pmat(11,11,:))))
 title('Deaths')
 
@@ -167,6 +170,11 @@ hold on
 % plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 title('Mobility')
+
+subplot(3,3,9)
+
+plot(sum(xV,1),'--')
+title('Total population')
 
 %use fmincon optimal parameters
 %incorporate euler maryama inside the dynamics
@@ -200,7 +208,7 @@ hold on
 plot(1:size(xV,2),xV(2,:));
 plot(1:size(xV,2),xV(3,:));
 title('Susceptible')
-legend("\S","\S_m","\S_h");
+legend("S","S_m","S_h");
 
 
 subplot(1,3,2)
@@ -210,7 +218,7 @@ hold on
 plot(1:size(xV,2),xV(5,:));
 plot(1:size(xV,2),xV(6,:));
 title('Exposed')
-legend("\E","\E_m","\E_h");
+legend("E","E_m","E_h");
 
 
 subplot(1,3,3)
@@ -220,7 +228,7 @@ hold on
 plot(1:size(xV,2),xV(8,:));
 plot(1:size(xV,2),xV(9,:));
 title('Infectious')
-legend("\I","\I_m","\I_h");
+legend("I","I_m","I_h");
 
 function [x_kp1] = seirDynamics(xk,dt)
 x_kp1=xk;
@@ -276,8 +284,10 @@ gamma = xk(31);
 epsilon = xk(32);
 n = 1000;
 Dt = dt/n;
+
+N = S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+D+U;
 for i = 1:n
-    N = S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+D+U;
+    
     lambda = (beta/N)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_m = (beta/N)*(1-eta_Sm)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_h = (beta/N)*(1-eta_Sh)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
@@ -353,5 +363,6 @@ z(2) = xk(11); %death
 z(3) = xk(13); % Vax
 z(4) = (xk(2)+xk(5)+xk(8))/sum(xk(1:12)); % Mask
 z(5) = -100*(xk(3)+xk(6)+xk(9))./(sum(xk(1:12))); % Mobility
+z(6) = sum(xk(1:12)); % population
 
 end

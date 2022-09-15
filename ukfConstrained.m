@@ -65,13 +65,13 @@ c=sqrt(c);
 try
     P=nearestSPD(P); % ideally this should go
     X=sigmas(x,P,c);                            %sigma points around x
-    X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax);          % constrain
+    X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax,P);          % constrain
 
 catch
     keyboard
 end
 [x1,X1,P1,X2]=ut(fstate,X,Wm,Wc,L,Q);          %unscented transformation of process
-X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax);          % constrain
+X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax,P);          % constrain
 % X1=sigmas(x1,P1,c);                         %sigma points around x1
 % X2=X1-x1(:,ones(1,size(X1,2)));             %deviation of X1
 [z1,Z1,P2,Z2]=ut(hmeas,X1,Wm,Wc,m,R);       %unscented transformation of measurments
@@ -121,7 +121,7 @@ X = [x Y+A Y-A];
 
 end
 
-function X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax)
+function X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax,P)
 [len, npoints] = size(X);
 
 
@@ -130,11 +130,9 @@ for i = 1:len
 
     for k = 1:npoints
         if X(i,k) < sigmaLimitsMin(i)
-            X(i,k) = sigmaLimitsMin(i)+ 0.001;
-        end
-
-        if X(i,k) > sigmaLimitsMax(i)
-            X(i,k)  = sigmaLimitsMax(i);
+            X(i,k) = sigmaLimitsMin(i) + 1.0*sqrt(P(i,i));
+        elseif X(i,k) > sigmaLimitsMax(i)
+            X(i,k)  = sigmaLimitsMax(i) - 0.01*sigmaLimitsMax(i) ;
         end
     end
 
