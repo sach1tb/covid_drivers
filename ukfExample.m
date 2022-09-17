@@ -1,7 +1,5 @@
 clearvars
-close all
-% addpath C:\Users\aruni\OneDrive - Northern Illinois University\NIUCourseWork\MEE697\part4\ConditionalEntropy\SEIR_withIsolation\src\boundedline\boundedline
-% addpath C:\Users\aruni\OneDrive - Northern Illinois University\NIUCourseWork\MEE697\part4\ConditionalEntropy\SEIR_withIsolation\src\boundedline\
+% close all
 addpath('..\boundedline\boundedline')
 addpath('..\boundedline\Inpaint_nans')
 
@@ -10,7 +8,13 @@ nc=13; np=19;
 n=nc+np;%number of state
 m = 6; %number of measurements
 dt = 1;
-R=diag([1000,100,1000,0.1,10,10000]);        % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
+% infection count is not accurate [ ref?]
+% death is accurate
+% vaccination is accurate
+% mask is not accurate
+% mobility is not accurate
+% population is acccurate [census?]
+R=diag([1000,100,1000,0.3,10,500]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
 %-- fmnincon optimal parameters
 beta0 = 0.5;
@@ -34,18 +38,20 @@ phi_S0 = 0.05;
 xi_Sh0 = 0.001;
 xi_S0 = 0.001;
 
+% initial estimate
 parameterInit = [beta0,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,xi_Sh0,xi_S0 ...
     alpha0,phi_Sm0,phi_S0,sigma_S0,sigma_Sm0,sigma_Sh0,kappa_R0,kappa_Rm0 ...
     kappa_Rh0, mu0, gamma0, epsilon0];
 
-sigmaLimitsMax = [9.7e6*ones(1,nc), 0.8*ones(1,np)];
+% sigma limits for constrained ukf
+sigmaLimitsMax = [1e7*ones(1,nc), 0.8*ones(1,np)];
 sigmaLimitsMin = [0*ones(1,nc), 0*ones(1,np)];
 
 Q=diag([1e-6*ones(1,nc), 0.1*parameterInit]); % covariance of process
 f=@(x) seirDynamics(x,dt);  % nonlinear state equations
 h=@(x) seirObservation(x);                               % measurement equation
 s=[zeros(1,nc),parameterInit]';  %
-s(1) = 9.7e6-24; % initial state susceptible
+s(1) = 9684738-24; %9.7e6-24; % initial state susceptible
 s(7) = 24; % initial infections
 x=s; %initial state          % initial state with noise
 P = Q;                        % initial state covraiance
@@ -56,22 +62,22 @@ zV = zeros(m,N);
  
 % readData
 maxT = N; %maximum is 1000
-infectious = csvread('infectiousIllinois.csv');
+infectious = csvread('data/infectiousIllinois.csv');
 infectious(isnan(infectious))=0;
 infectious = infectious*(9.7/12.8);
 
-death = csvread('deathIllinois.csv');
+death = csvread('data/deathIllinois.csv');
 death(isnan(death))=0;
 death = cumsum(death);
 death = death*(9.7/12.8);
 
 
-vax = csvread('vaccinatedIllinois.csv');
+vax = csvread('data/vaccinatedIllinois.csv');
 vax(isnan(vax))=0;
 vax = vax*(9.7/12.8);
-mask= csvread('maskIllinois.csv');
+mask= csvread('data/maskIllinois.csv');
 
-mobility = csvread('mobilityIllinois.csv');
+mobility = csvread('data/mobilityIllinois.csv');
 mobility(isnan(mobility))=0;
 
 death = death(1:maxT);
@@ -81,15 +87,13 @@ mask =  mask(1:maxT);
 mobility =  mobility(1:maxT);
 
 dayStops = [1 332 697 1002]; 
+% from real data?
 popChicagoMetro = [9684738 9601605 9509934 9433330];
 days = 1:1:maxT;
 popDays = interp1(dayStops,popChicagoMetro,days);
 
 totPopulation = popDays';
-% totPopulation = 9.7e6*ones(1,maxT)';
 z = [infectious';death';vax';mask';mobility';totPopulation']; % measurments
-
-% z = [infectious';death';vax';mask';mobility';totPopulation']; % measurments
 
 pmat = zeros(n,n,maxT);
 Xprev = zeros((np+nc),2*(np+nc)+1);
@@ -187,7 +191,8 @@ plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 title('Mobility')
 
 subplot(3,3,9)
-
+plot(totPopulation,'-');
+hold on;
 plot(sum(xV,1),'--')
 title('Total population')
 
