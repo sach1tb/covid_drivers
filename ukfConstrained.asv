@@ -1,4 +1,4 @@
-function [x,P,Xnext]=ukfConstrained(fstate,x,P,hmeas,z,Q,R,sigmaLimitsMin,sigmaLimitsMax,sigmaMigrationLimit,Xprev,timeStepnumber,sigmaStart)
+function [x,P,Xnext]=ukfConstrained(fstate,x,P,hmeas,z,Q,R,sigmaLimitsMin,sigmaLimitsMax,sigmaMigrationLimit,Xprev,timeStepnumber)
 % UKF   Unscented Kalman Filter for nonlinear dynamic systems
 % [x, P] = ukf(f,x,P,h,z,Q,R) returns state estimate, x and state covariance, P
 % for nonlinear dynamic system (for simplicity, noises are assumed as additive):
@@ -51,8 +51,8 @@ end
 %
 % By Yi Cao at Cranfield University, 04/01/2008
 %
-L=numel(x);                                 %number of states
-m=numel(z);                                 %number of measurements
+L=numel(x);                                 %numer of states
+m=numel(z);                                 %numer of measurements
 alpha=1e-3;                                 %default, tunable
 ki=0;                                       %default, tunable
 beta=2;                                     %default, tunable
@@ -65,19 +65,12 @@ c=sqrt(c);
 try
     P=nearestSPD(P); % ideally this should go
     X=sigmas(x,P,c);                            %sigma points around x
-    if(timeStepnumber>1)
-        X = migrationLimit(Xprev,X,sigmaMigrationLimit,sigmaStart);
-    end
     X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax,P);          % constrain
-
 
 catch
     keyboard
 end
 [x1,X1,P1,X2]=ut(fstate,X,Wm,Wc,L,Q);          %unscented transformation of process
-if(timeStepnumber>1)
-    X1 = migrationLimit(Xprev,X1,sigmaMigrationLimit,sigmaStart);
-end
 X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax,P);          % constrain
 % X1=sigmas(x1,P1,c);                         %sigma points around x1
 % X2=X1-x1(:,ones(1,size(X1,2)));             %deviation of X1
@@ -138,24 +131,24 @@ for i = 1:len
         if X(i,k) < sigmaLimitsMin(i)
             X(i,k) = sigmaLimitsMin(i) + 0.01*sqrt(P(i,i));
         elseif X(i,k) > sigmaLimitsMax(i)
-            X(i,k)  = sigmaLimitsMax(i) - 0.001*sqrt(P(i,i)) ;
+            X(i,k)  = sigmaLimitsMax(i) - 0.00*sigmaLimitsMax(i) ;
         end
     end
 end
 end
 
-function Xnext = migrationLimit(Xprev,Xnext,sigmaMigrationLimit,sigmaStart)
+function Xnext = migrationLimit(Xprev,Xnext,sigmaMigrationLimit)
 [len, npoints] = size(Xprev);
 
 
 % Apply constraints
-for i = sigmaStart:len
+for i = 1:len
 
     for k = 1:npoints
         if abs(Xprev(i,k)-Xnext(i,k))/Xprev(i,k) > sigmaMigrationLimit
-            Xnext(i,k) = Xprev(i,k) + sign(Xprev(i,k)-Xnext(i,k))*sigmaMigrationLimit*Xprev(i,k);
-        else
-            Xnext(i,k)  = Xnext(i,k);
+            Xnext(i,k) = Xnext(i) + 0.01*sqrt(P(i,i));
+        elseif Xprev(i,k) > Xnext(i)
+            Xprev(i,k)  = Xnext(i) - 0.00*Xnext(i) ;
         end
     end
 

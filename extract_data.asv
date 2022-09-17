@@ -22,10 +22,9 @@ days2021 = find(data2021.location_id == 536);
 days2022 = find(data2022.location_id == 536);
 plot(Vaccinated);
 
-dayStops = [1 332 697 1002];
-popChicagoMetro = [9684738 9601605 9509934 9433330];
-days = 1:1:1002;
-popDays = interp1(dayStops,popChicagoMetro,days);
+popChicagoMetro = [332 365 305];
+popChicagoMetro = [9601605 9509934 9433330];
+
 % writematrix(Infection,'infectious.csv');
 % writematrix(Vaccinated,'vaccinated.csv');
 % writematrix(Masked,'mask.csv');

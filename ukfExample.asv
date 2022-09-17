@@ -10,7 +10,7 @@ nc=13; np=19;
 n=nc+np;%number of state
 m = 6; %number of measurements
 dt = 1;
-R=diag([1000,100,1000,0.1,10,10000]);        % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
+R=diag([1000,100,1000,0.1,10,1000]);        % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
 %-- fmnincon optimal parameters
 beta0 = 0.5;
@@ -79,30 +79,19 @@ vax = vax(1:maxT);
 infectious =  infectious(1:maxT);
 mask =  mask(1:maxT);
 mobility =  mobility(1:maxT);
-
-dayStops = [1 332 697 1002]; 
-popChicagoMetro = [9684738 9601605 9509934 9433330];
-days = 1:1:maxT;
-popDays = interp1(dayStops,popChicagoMetro,days);
-
-totPopulation = popDays';
-% totPopulation = 9.7e6*ones(1,maxT)';
+totPopulation = 9.7e6*ones(1,maxT)';
 z = [infectious';death';vax';mask';mobility';totPopulation']; % measurments
 
-% z = [infectious';death';vax';mask';mobility';totPopulation']; % measurments
-
 pmat = zeros(n,n,maxT);
-Xprev = zeros((np+nc),2*(np+nc)+1);
-sigmaMigrationLimit = 0;
+xPrev = zeros((np+nc),2*)
 for k=1:N
     zk=z(:,k);                            % save actual state
-    zV(:,k)  = zk;                         % save measurment
-    if(sigmaMigrationLimit == 0)
-        migrationFlag = 1;
+    zV(:,k)  = zk;                             % save measurment
+    if K == 1
+    [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax,0.1*ones(1,(nc+np)));            % ekf
     else
-        migrationFlag = k;
+    
     end
-    [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax,sigmaMigrationLimit,Xprev,migrationFlag,nc+1);            % ekf
     pmat(:,:,k) = P;
     xV(:,k) = x;                            % save estimate
     disp(k);
@@ -131,7 +120,7 @@ subplot(3,3,1)
 % plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 
 plot(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)),'--')
-%boundedline(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)), sqrt(squeeze(pmat(1,1,:))))
+boundedline(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)), sqrt(squeeze(pmat(1,1,:))))
 title('Susceptible')
 
 subplot(3,3,2)
@@ -145,7 +134,7 @@ plot(infectious,'-','Color','g');
 hold on
 plot(xV(7,:)+xV(8,:)+xV(9,:),'--','Color','r','LineWidth',1.4)
 
-%boundedline(1:size(xV,2),(xV(7,:)+xV(8,:)+xV(9,:)), sqrt(squeeze(pmat(7,7,:))))
+boundedline(1:size(xV,2),(xV(7,:)+xV(8,:)+xV(9,:)), sqrt(squeeze(pmat(7,7,:))))
 title('Infectious')
 
 
@@ -159,7 +148,7 @@ plot(death,'-');
 
 hold on
 plot(xV(11,:),'--','Color','r')
-%boundedline(1:size(xV,2),xV(11,:), sqrt(squeeze(pmat(11,11,:))))
+boundedline(1:size(xV,2),xV(11,:), sqrt(squeeze(pmat(11,11,:))))
 title('Deaths')
 
 
@@ -168,7 +157,7 @@ subplot(3,3,6)
 plot(vax,'-');
 hold on
 plot(xV(13,:),'--')
-%boundedline(1:size(xV,2),xV(13,:), sqrt(squeeze(pmat(13,13,:))))
+boundedline(1:size(xV,2),xV(13,:), sqrt(squeeze(pmat(13,13,:))))
 title('Vaccinated')
 
 
@@ -191,13 +180,6 @@ subplot(3,3,9)
 plot(sum(xV,1),'--')
 title('Total population')
 
-if sigmaMigrationLimit~= 0
-str = sprintf("sigma migration limit %0.6f \%",sigmaMigrationLimit);
-else
-str = sprintf("No migration limit");
-end
-sgtitle(str)
-
 %use fmincon optimal parameters
 %incorporate euler maryama inside the dynamics
 %
@@ -218,7 +200,7 @@ hold on
 
 title(legendStr{ii});
 end
-sgtitle(str)
+
 
 
 figure(3); gcf; clf;
@@ -307,9 +289,9 @@ epsilon = xk(32);
 n = 100;
 Dt = dt/n;
 
-
+N = S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+D+U;
 for i = 1:n
-    N = S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+D+U;
+    
     lambda = (beta/N)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_m = (beta/N)*(1-eta_Sm)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_h = (beta/N)*(1-eta_Sh)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
