@@ -1,7 +1,5 @@
 clearvars
-close all
-% addpath C:\Users\aruni\OneDrive - Northern Illinois University\NIUCourseWork\MEE697\part4\ConditionalEntropy\SEIR_withIsolation\src\boundedline\boundedline
-% addpath C:\Users\aruni\OneDrive - Northern Illinois University\NIUCourseWork\MEE697\part4\ConditionalEntropy\SEIR_withIsolation\src\boundedline\
+% close all
 addpath('..\boundedline\boundedline')
 addpath('..\boundedline\Inpaint_nans')
 
@@ -10,7 +8,13 @@ nc=13; np=19;
 n=nc+np;%number of state
 m = 6; %number of measurements
 dt = 1;
-R=diag([1000,100,1000,0.1,10,1000]);        % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
+% infection count is not accurate [ ref?]
+% death is accurate
+% vaccination is accurate
+% mask is not accurate
+% mobility is not accurate
+% population is acccurate [census?]
+R=diag([1000,100,1000,0.3,10,500]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
 %-- fmnincon optimal parameters
 beta0 = 0.5;
@@ -34,18 +38,20 @@ phi_S0 = 0.05;
 xi_Sh0 = 0.001;
 xi_S0 = 0.001;
 
+% initial estimate
 parameterInit = [beta0,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,xi_Sh0,xi_S0 ...
     alpha0,phi_Sm0,phi_S0,sigma_S0,sigma_Sm0,sigma_Sh0,kappa_R0,kappa_Rm0 ...
     kappa_Rh0, mu0, gamma0, epsilon0];
 
-sigmaLimitsMax = [9.7e6*ones(1,nc), 0.8*ones(1,np)];
+% sigma limits for constrained ukf
+sigmaLimitsMax = [1e7*ones(1,nc), 0.8*ones(1,np)];
 sigmaLimitsMin = [0*ones(1,nc), 0*ones(1,np)];
 
 Q=diag([1e-6*ones(1,nc), 0.1*parameterInit]); % covariance of process
 f=@(x) seirDynamics(x,dt);  % nonlinear state equations
 h=@(x) seirObservation(x);                               % measurement equation
 s=[zeros(1,nc),parameterInit]';  %
-s(1) = 9.7e6-24; % initial state susceptible
+s(1) = 9684738-24; %9.7e6-24; % initial state susceptible
 s(7) = 24; % initial infections
 x=s; %initial state          % initial state with noise
 P = Q;                        % initial state covraiance
@@ -56,22 +62,23 @@ zV = zeros(m,N);
  
 % readData
 maxT = N; %maximum is 1000
-infectious = csvread('infectiousIllinois.csv');
+infectious = csvread('data/infectiousIllinois.csv');
 infectious(isnan(infectious))=0;
 infectious = infectious*(9.7/12.8);
 
-death = csvread('deathIllinois.csv');
+death = csvread('data/deathIllinois.csv');
 death(isnan(death))=0;
 death = cumsum(death);
 death = death*(9.7/12.8);
 
 
-vax = csvread('vaccinatedIllinois.csv');
+vax = csvread('data/vaccinatedIllinois.csv');
+vax = cumsum(0.0e1*(1+sin(0.01*(1:1:1002))))';
 vax(isnan(vax))=0;
 vax = vax*(9.7/12.8);
-mask= csvread('maskIllinois.csv');
+mask= csvread('data/maskIllinois.csv');
 
-mobility = csvread('mobilityIllinois.csv');
+mobility = csvread('data/mobilityIllinois.csv');
 mobility(isnan(mobility))=0;
 
 death = death(1:maxT);
@@ -79,19 +86,28 @@ vax = vax(1:maxT);
 infectious =  infectious(1:maxT);
 mask =  mask(1:maxT);
 mobility =  mobility(1:maxT);
-totPopulation = 9.7e6*ones(1,maxT)';
-z = [infectious';death';vax';mask';mobility';totPopulation']; % measurments
+
+dayStops = [1 332 697 1002]; 
+% data sourced https://www.statista.com/statistics/815172/chicago-metro-area-population/
+popChicagoMetro = [9684738 9601605 9509934 9433330]; 
+days = 1:1:maxT;
+popDays = interp1(dayStops,popChicagoMetro,days);
+
+totPopulation = popDays';
+z = [infectious';death';vax';mask';mobility';totPopulation']; % measurements
 
 pmat = zeros(n,n,maxT);
-xPrev = zeros((np+nc),2*)
+Xprev = zeros((np+nc),2*(np+nc)+1);
+sigmaMigrationLimit = 0;
 for k=1:N
     zk=z(:,k);                            % save actual state
-    zV(:,k)  = zk;                             % save measurment
-    if K == 1
-    [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax,0.1*ones(1,(nc+np)));            % ekf
+    zV(:,k)  = zk;                         % save measurment
+    if(sigmaMigrationLimit == 0)
+        migrationFlag = 1;
     else
-    
+        migrationFlag = k;
     end
+    [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax,sigmaMigrationLimit,Xprev,migrationFlag,nc+1);            % ekf
     pmat(:,:,k) = P;
     xV(:,k) = x;                            % save estimate
     disp(k);
@@ -120,7 +136,7 @@ subplot(3,3,1)
 % plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 
 plot(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)),'--')
-boundedline(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)), sqrt(squeeze(pmat(1,1,:))))
+%boundedline(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)), sqrt(squeeze(pmat(1,1,:))))
 title('Susceptible')
 
 subplot(3,3,2)
@@ -134,7 +150,7 @@ plot(infectious,'-','Color','g');
 hold on
 plot(xV(7,:)+xV(8,:)+xV(9,:),'--','Color','r','LineWidth',1.4)
 
-boundedline(1:size(xV,2),(xV(7,:)+xV(8,:)+xV(9,:)), sqrt(squeeze(pmat(7,7,:))))
+%boundedline(1:size(xV,2),(xV(7,:)+xV(8,:)+xV(9,:)), sqrt(squeeze(pmat(7,7,:))))
 title('Infectious')
 
 
@@ -148,7 +164,7 @@ plot(death,'-');
 
 hold on
 plot(xV(11,:),'--','Color','r')
-boundedline(1:size(xV,2),xV(11,:), sqrt(squeeze(pmat(11,11,:))))
+%boundedline(1:size(xV,2),xV(11,:), sqrt(squeeze(pmat(11,11,:))))
 title('Deaths')
 
 
@@ -157,7 +173,7 @@ subplot(3,3,6)
 plot(vax,'-');
 hold on
 plot(xV(13,:),'--')
-boundedline(1:size(xV,2),xV(13,:), sqrt(squeeze(pmat(13,13,:))))
+%boundedline(1:size(xV,2),xV(13,:), sqrt(squeeze(pmat(13,13,:))))
 title('Vaccinated')
 
 
@@ -176,9 +192,17 @@ plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 title('Mobility')
 
 subplot(3,3,9)
-
+plot(totPopulation,'-');
+hold on;
 plot(sum(xV,1),'--')
 title('Total population')
+
+if sigmaMigrationLimit~= 0
+str = sprintf("sigma migration limit %0.6f",sigmaMigrationLimit);
+else
+str = sprintf("No migration limit");
+end
+sgtitle(str)
 
 %use fmincon optimal parameters
 %incorporate euler maryama inside the dynamics
@@ -200,7 +224,7 @@ hold on
 
 title(legendStr{ii});
 end
-
+sgtitle(str)
 
 
 figure(3); gcf; clf;
@@ -233,6 +257,20 @@ plot(1:size(xV,2),xV(8,:));
 plot(1:size(xV,2),xV(9,:));
 title('Infectious')
 legend("I","I_m","I_h");
+
+sgtitle(str)
+
+runPars = xV(14:end,:);
+runVars = zeros(size(xV(1:13,:)));
+vals = zeros(size(xV));
+vals(1) = 9684738-24; %9.7e6-24; % initial state susceptible
+s(7) = 24; % initial infections
+for ii = 1:maxT
+    vals(14:end,ii) = runPars(:,ii);
+    vals(:,ii+1) = seirDynamics(vals(:,ii),1);
+end
+
+
 
 function [x_kp1] = seirDynamics(xk,dt)
 x_kp1=xk;
@@ -289,9 +327,9 @@ epsilon = xk(32);
 n = 100;
 Dt = dt/n;
 
-N = S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+D+U;
+
 for i = 1:n
-    
+    N = S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+D+U;
     lambda = (beta/N)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_m = (beta/N)*(1-eta_Sm)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_h = (beta/N)*(1-eta_Sh)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
@@ -311,9 +349,10 @@ for i = 1:n
     R = R+ (-(kappa_R + kappa_Rm + kappa_Rh)*R+(I + Im + Ih)*gamma)*Dt;
     D = D+((I + Im + Ih)*mu)*Dt;
     U = U+(-(sigma_S + sigma_Sm + sigma_Sh)*U+(S + Sh + Sm)*alpha)*Dt;
+    V = V + alpha*(S + Sm+ Sh)*Dt;
 end
 
-V = V+ alpha*(S + Sm+ Sh);
+%V = V+ alpha*(S + Sm+ Sh);
 
 x_kp1(1) = S;
 x_kp1(2)=Sm;
@@ -361,12 +400,12 @@ function z = seirObservation(xk)
 % x_kp1(10)=R ;
 % x_kp1(11)=D ;
 % x_kp1(12)=U ;
-
+totPop = sum(xk(1:12));
 z(1) = xk(7)+xk(8)+xk(9); %Infectious
 z(2) = xk(11); %death
 z(3) = xk(13); % Vax
-z(4) = (xk(2)+xk(5)+xk(8))/sum(xk(1:12)); % Mask
-z(5) = -100*(xk(3)+xk(6)+xk(9))./(sum(xk(1:12))); % Mobility
-z(6) = sum(xk(1:12)); % population
-
+z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
+z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
+z(6) = totPop; % population
+disp(totPop);
 end

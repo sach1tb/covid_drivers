@@ -73,6 +73,7 @@ death = death*(9.7/12.8);
 
 
 vax = csvread('data/vaccinatedIllinois.csv');
+
 vax(isnan(vax))=0;
 vax = vax*(9.7/12.8);
 mask= csvread('data/maskIllinois.csv');
@@ -87,13 +88,13 @@ mask =  mask(1:maxT);
 mobility =  mobility(1:maxT);
 
 dayStops = [1 332 697 1002]; 
-% from real data?
-popChicagoMetro = [9684738 9601605 9509934 9433330];
+% data sourced https://www.statista.com/statistics/815172/chicago-metro-area-population/
+popChicagoMetro = [9684738 9601605 9509934 9433330]; 
 days = 1:1:maxT;
 popDays = interp1(dayStops,popChicagoMetro,days);
 
 totPopulation = popDays';
-z = [infectious';death';vax';mask';mobility';totPopulation']; % measurments
+z = [infectious';death';vax';mask';mobility';totPopulation']; % measurements
 
 pmat = zeros(n,n,maxT);
 Xprev = zeros((np+nc),2*(np+nc)+1);
@@ -197,7 +198,7 @@ plot(sum(xV,1),'--')
 title('Total population')
 
 if sigmaMigrationLimit~= 0
-str = sprintf("sigma migration limit %0.6f \%",sigmaMigrationLimit);
+str = sprintf("sigma migration limit %0.6f",sigmaMigrationLimit);
 else
 str = sprintf("No migration limit");
 end
@@ -256,6 +257,89 @@ plot(1:size(xV,2),xV(8,:));
 plot(1:size(xV,2),xV(9,:));
 title('Infectious')
 legend("I","I_m","I_h");
+
+sgtitle(str)
+
+runPars = xV(14:end,:);
+runVars = zeros(size(xV(1:13,:)));
+vals = zeros(size(xV));
+vals(1,1) = 9684738-24; %9.7e6-24; % initial state susceptible
+vals(7,1) = 24; % initial infections
+for ii = 1:maxT
+    vals(14:end,ii) = runPars(:,ii);
+    vals(:,ii+1) = seirDynamics(vals(:,ii),1);
+end
+
+
+figure(5); gcf; clf;
+
+subplot(3,3,1)
+
+% plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
+
+plot(1:size(vals,2),(vals(1,:)+vals(2,:)+vals(3,:)),'--')
+%boundedline(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)), sqrt(squeeze(pmat(1,1,:))))
+title('Susceptible')
+
+subplot(3,3,2)
+
+% plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
+plot((vals(4,:)+vals(5,:)+vals(6,:)),'--')
+title('Exposed')
+
+subplot(3,3,3)
+plot(infectious,'-','Color','g');
+hold on
+plot(vals(7,:)+vals(8,:)+vals(9,:),'--','Color','r','LineWidth',1.4)
+
+%boundedline(1:size(xV,2),(xV(7,:)+xV(8,:)+xV(9,:)), sqrt(squeeze(pmat(7,7,:))))
+title('Infectious')
+
+
+subplot(3,3,4)
+plot(vals(10,:),'--')
+title('Recovered')
+
+subplot(3,3,5)
+% plot(zV(2,:),'-');
+plot(death,'-');
+
+hold on
+plot(vals(11,:),'--','Color','r')
+%boundedline(1:size(xV,2),xV(11,:), sqrt(squeeze(pmat(11,11,:))))
+title('Deaths')
+
+
+
+subplot(3,3,6)
+plot(vax,'-');
+hold on
+plot(vals(13,:),'--')
+%boundedline(1:size(xV,2),xV(13,:), sqrt(squeeze(pmat(13,13,:))))
+title('Vaccinated')
+
+
+subplot(3,3,7)
+plot(mask,'-');
+hold on
+% plot((xV(2,:)+xV(5,:)+xV(8,:))./sum(xV(1:12,:),1) ,'--')
+plot((vals(2,:)+vals(5,:)+vals(8,:))./sum(vals(1:12,:),1) ,'--')
+title('Masked')
+
+subplot(3,3,8)
+plot(mobility,'-');
+hold on
+% plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
+plot(-100*(vals(3,:)+vals(6,:)+vals(9,:))./sum(vals(1:12,:),1),'--')
+title('Mobility')
+
+subplot(3,3,9)
+plot(totPopulation,'-');
+hold on;
+plot(sum(vals,1),'--')
+title('Total population')
+
+
 
 function [x_kp1] = seirDynamics(xk,dt)
 x_kp1=xk;
@@ -334,9 +418,10 @@ for i = 1:n
     R = R+ (-(kappa_R + kappa_Rm + kappa_Rh)*R+(I + Im + Ih)*gamma)*Dt;
     D = D+((I + Im + Ih)*mu)*Dt;
     U = U+(-(sigma_S + sigma_Sm + sigma_Sh)*U+(S + Sh + Sm)*alpha)*Dt;
+    V = V + alpha*(S + Sm+ Sh)*Dt;
 end
 
-V = V+ alpha*(S + Sm+ Sh);
+%V = V+ alpha*(S + Sm+ Sh);
 
 x_kp1(1) = S;
 x_kp1(2)=Sm;
@@ -384,12 +469,12 @@ function z = seirObservation(xk)
 % x_kp1(10)=R ;
 % x_kp1(11)=D ;
 % x_kp1(12)=U ;
-
+totPop = sum(xk(1:12));
 z(1) = xk(7)+xk(8)+xk(9); %Infectious
 z(2) = xk(11); %death
 z(3) = xk(13); % Vax
-z(4) = (xk(2)+xk(5)+xk(8))/sum(xk(1:12)); % Mask
-z(5) = -100*(xk(3)+xk(6)+xk(9))./(sum(xk(1:12))); % Mobility
-z(6) = sum(xk(1:12)); % population
-
+z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
+z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
+z(6) = totPop; % population
+disp(totPop);
 end
