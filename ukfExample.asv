@@ -73,7 +73,7 @@ death = death*(9.7/12.8);
 
 
 vax = csvread('data/vaccinatedIllinois.csv');
-vax = cumsum(0.0e1*(1+sin(0.01*(1:1:1002))))';
+
 vax(isnan(vax))=0;
 vax = vax*(9.7/12.8);
 mask= csvread('data/maskIllinois.csv');
@@ -260,17 +260,6 @@ legend("I","I_m","I_h");
 
 sgtitle(str)
 
-runPars = xV(14:end,:);
-runVars = zeros(size(xV(1:13,:)));
-vals = zeros(size(xV));
-vals(1) = 9684738-24; %9.7e6-24; % initial state susceptible
-s(7) = 24; % initial infections
-for ii = 1:maxT
-    vals(14:end,ii) = runPars(:,ii);
-    vals(:,ii+1) = seirDynamics(vals(:,ii),1);
-end
-
-
 
 function [x_kp1] = seirDynamics(xk,dt)
 x_kp1=xk;
@@ -334,22 +323,47 @@ for i = 1:n
     lambda_m = (beta/N)*(1-eta_Sm)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_h = (beta/N)*(1-eta_Sh)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
 
-    S = S + (-(xi_Sh + alpha + phi_Sm + lambda)*S + kappa_R * R + xi_S *Sh + sigma_S * U + phi_S*Sm)*Dt;
-    Sm =Sm+ (-(lambda_m + phi_S + alpha)*Sm + sigma_Sm * U + kappa_Rm * R + phi_Sm * S)*Dt;
-    Sh =Sh+ (-(alpha + xi_S + lambda_h)*Sh + sigma_Sh * U + xi_Sh * S + kappa_Rh * R)*Dt;
+    dS = (-(xi_Sh + alpha + phi_Sm + lambda)*S + kappa_R * R + xi_S *Sh + sigma_S * U + phi_S*Sm)*Dt;
+    dSm =(-(lambda_m + phi_S + alpha)*Sm + sigma_Sm * U + kappa_Rm * R + phi_Sm * S)*Dt;
+    dSh =(-(alpha + xi_S + lambda_h)*Sh + sigma_Sh * U + xi_Sh * S + kappa_Rh * R)*Dt;
 
-    E =E+ (-(epsilon + phi_Em + xi_Eh)*E + xi_E * Eh + phi_E * Em + lambda*S )*Dt;
-    Em = Em+(-(epsilon + phi_E) * Em + phi_Em*E + lambda_m* Sm)*Dt;
-    Eh =Eh+ (-(epsilon + xi_E)*Eh + lambda_h * Sh + xi_Eh * E)*Dt;
+    dE =(-(epsilon + phi_Em + xi_Eh)*E + xi_E * Eh + phi_E * Em + lambda*S )*Dt;
+    dEm =(-(epsilon + phi_E) * Em + phi_Em*E + lambda_m* Sm)*Dt;
+    dEh =(-(epsilon + xi_E)*Eh + lambda_h * Sh + xi_Eh * E)*Dt;
 
-    I =I+ (-(mu + gamma + xi_Ih + phi_Im)*I + epsilon*E + phi_I* Im + xi_I *Ih)*Dt;
-    Im =Im+ (-(phi_I + gamma + mu)*Im + phi_Im*I + epsilon*Em)*Dt;
-    Ih =Ih+ (-(xi_I + gamma + mu)*Ih + epsilon*Eh + xi_Ih*I)*Dt;
+    dI =(-(mu + gamma + xi_Ih + phi_Im)*I + epsilon*E + phi_I* Im + xi_I *Ih)*Dt;
+    dIm =(-(phi_I + gamma + mu)*Im + phi_Im*I + epsilon*Em)*Dt;
+    dIh = (-(xi_I + gamma + mu)*Ih + epsilon*Eh + xi_Ih*I)*Dt;
 
-    R = R+ (-(kappa_R + kappa_Rm + kappa_Rh)*R+(I + Im + Ih)*gamma)*Dt;
-    D = D+((I + Im + Ih)*mu)*Dt;
-    U = U+(-(sigma_S + sigma_Sm + sigma_Sh)*U+(S + Sh + Sm)*alpha)*Dt;
-    V = V + alpha*(S + Sm+ Sh)*Dt;
+    dR =  (-(kappa_R + kappa_Rm + kappa_Rh)*R+(I + Im + Ih)*gamma)*Dt;
+    dD = ((I + Im + Ih)*mu)*Dt;
+    dU = (-(sigma_S + sigma_Sm + sigma_Sh)*U+(S + Sh + Sm)*alpha)*Dt;
+
+    totGrads = dS + dSm + dSh + dE + dEm + dEh + dI + dIm + dIh + dR + dD + dU;
+    if abs(dS +) < 100
+        keyboard
+    end
+
+    dV =  alpha*(S + Sm+ Sh)*Dt;
+
+    S = S+dS;
+    Sm = Sm + dSm;
+    Sh = Sh + dSh;
+
+    E = E + dE;
+    Em = Em + dEm;
+    Eh = Eh + dEh;
+
+    I = I + dI;
+    Im = I + dIm;
+    Ih = Ih + dIh;
+
+    R = R + dR;
+    D = D + dD;
+    U = U + dU;
+
+    V = V + dV;
+
 end
 
 %V = V+ alpha*(S + Sm+ Sh);
@@ -407,5 +421,5 @@ z(3) = xk(13); % Vax
 z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
 z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
 z(6) = totPop; % population
-disp(totPop);
+
 end
