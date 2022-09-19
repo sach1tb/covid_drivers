@@ -469,12 +469,12 @@ function z = seirObservation(xk)
 % x_kp1(10)=R ;
 % x_kp1(11)=D ;
 % x_kp1(12)=U ;
-totPop = sum(xk(1:12));
+
 z(1) = xk(7)+xk(8)+xk(9); %Infectious
 z(2) = xk(11); %death
 z(3) = xk(13); % Vax
 z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
 z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
-z(6) = totPop; % population
-disp(totPop);
+z(6) = sum(xk(1:12)); % population
+
 end
