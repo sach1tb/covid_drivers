@@ -88,7 +88,7 @@ mask =  mask(1:maxT);
 mobility =  mobility(1:maxT);
 
 dayStops = [1 332 697 1002]; 
-% data sourced https://www.statista.com/statistics/815172/chicago-metro-area-population/
+% data source https://www.statista.com/statistics/815172/chicago-metro-area-population/
 popChicagoMetro = [9684738 9601605 9509934 9433330]; 
 days = 1:1:maxT;
 popDays = interp1(dayStops,popChicagoMetro,days);
@@ -98,7 +98,9 @@ z = [infectious';death';vax';mask';mobility';totPopulation']; % measurements
 
 pmat = zeros(n,n,maxT);
 Xprev = zeros((np+nc),2*(np+nc)+1);
+sigmaPointAccumulutor = zeros(size(Xprev,1),size(Xprev,2),nc+np);
 sigmaMigrationLimit = 0;
+covarianceMatrix = [];
 for k=1:N
     zk=z(:,k);                            % save actual state
     zV(:,k)  = zk;                         % save measurment
@@ -108,11 +110,14 @@ for k=1:N
         migrationFlag = k;
     end
     [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax,sigmaMigrationLimit,Xprev,migrationFlag,nc+1);            % ekf
+    sigmaPointAccumulutor(:,:,k) = Xprev;
+    covarianceMatrix(:,:,k) = P;
     pmat(:,:,k) = P;
     xV(:,k) = x;                            % save estimate
     disp(k);
 end
 
+save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 % remove outliers
 % for jj=1:n
 %     mu=mean(xV(jj,:));
