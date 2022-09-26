@@ -361,7 +361,7 @@ for i = 1:n
     Eh = Eh + dEh;
 
     I = I + dI;
-    Im = I + dIm;
+    Im = Im + dIm;
     Ih = Ih + dIh;
 
     R = R + dR;
