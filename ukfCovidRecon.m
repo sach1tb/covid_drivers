@@ -125,6 +125,17 @@ for k=1:T
     disp(k);
 end
 
+% Run smoother
+for k = 1:T
+    pmat(:,:,k)=nearestSPD(pmat(:,:,k));
+end
+f=@(x,param) seirDynamics(x,dt);  % nonlinear state equations
+
+[M,Ps,S] = urts_smooth1(xV,pmat,f,Q,{dt});
+
+% reassigning variables
+xV = M;
+pmat = P;
 save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 % remove outliers
 % for jj=1:n
@@ -135,11 +146,11 @@ save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 %     xV(jj,idx)=nan;
 % end
 
-for jj = 1:n
-%     xV(jj,:) = filloutliers(xV(jj,:),'linear');
-%     xV(jj,:)= smooth(xV(jj,:),7,'sgolay');
-    
-end
+% for jj = 1:n
+% %     xV(jj,:) = filloutliers(xV(jj,:),'linear');
+% %     xV(jj,:)= smooth(xV(jj,:),7,'sgolay');
+%     
+% end
 
 % plot results
 figure(1); gcf; clf;

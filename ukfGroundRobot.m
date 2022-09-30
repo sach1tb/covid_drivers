@@ -2,7 +2,7 @@ clearvars
 % close all
 addpath('..\boundedline\boundedline')
 addpath('..\boundedline\Inpaint_nans')
-
+addpath('..\ekfukf-develop\')
 % generating 2D data from a mobile robot with unicycle kinematics
 % set the parameters
 % note the timestep size.
@@ -35,7 +35,7 @@ Fk= [ 1, 0, dt,  0
     0, 0, 1,  0
     0, 0, 0,  1];
 
-f=@(x) Fk*x;  % nonlinear state equations
+f=@(x,param) Fk*x;  % nonlinear state equations
 
 Q= eye(4)*10;
 
@@ -47,12 +47,16 @@ covarianceMatrix = zeros(n,n,T);
 for k=1:T
     zk=z(:,k);                            % save actual state
     zV(:,k)  = zk;                         % save measurment
+    
     [x, P] = ukf(f,x,P,h,zk,Q,R);
         pmat(:,:,k) = P;
 
     xV(:,k) = x;                            % save estimate
     disp(k);
 end
+
+% Run smoother
+[M,Ps,S] = urts_smooth1(xV,pmat,f,Q,{});
 
 % plot results
 % show the results
@@ -66,7 +70,7 @@ for ii=1:3
     hold on;
 %     plot(Z(ii,:), 'k*');
     plot(xV(ii,:), 'r', 'linewidth', 2);
-    boundedline(1:T, xV(ii,:), squeeze(P(ii,ii,:))', '-g', 'alpha');
+    boundedline(1:T, xV(ii,:), squeeze(pmat(ii,ii,:))', '-g', 'alpha');
     set(gca, 'fontname', 'times', 'fontsize', 24);
     grid on;
     ylabel(ylabels{ii});
@@ -81,6 +85,24 @@ axis image;
 set(gca, 'fontname', 'times', 'fontsize', 24);
 legend('ground truth','estimate', 'location', 'northeastoutside');
 
+
+
+figure(2); gcf; clf;
+
+ylabels={'x_1', 'x_2', '\theta'};
+gt=gt';
+for ii=1:3
+    subplot(2,2,ii+1); gca;
+    plot(gt(ii,:), 'k', 'linewidth', 2);
+    hold on;
+%     plot(Z(ii,:), 'k*');
+    plot(M(ii,:), 'r', 'linewidth', 2);
+    boundedline(1:T, M(ii,:), squeeze(Ps(ii,ii,:))', '-g', 'alpha');
+    set(gca, 'fontname', 'times', 'fontsize', 24);
+    grid on;
+    ylabel(ylabels{ii});
+end
+xlabel('time');
 
 
 
