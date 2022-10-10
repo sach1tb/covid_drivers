@@ -1,7 +1,7 @@
 clearvars
 % close all
-addpath('..\boundedline\boundedline')
-addpath('..\boundedline\Inpaint_nans')
+addpath(['..', filesep, 'boundedline', filesep, 'boundedline'])
+addpath(['..', filesep, 'boundedline', filesep, 'Inpaint_nans'])
 
 
 nc=13; np=19;
@@ -107,17 +107,11 @@ z = [infectious';death';vax';mask';mobility';totPopulation']; % measurements
 pmat = zeros(n,n,T);
 Xprev = zeros((np+nc),2*(np+nc)+1);
 sigmaPointAccumulutor = zeros(size(Xprev,1),size(Xprev,2),n);
-sigmaMigrationLimit = 0;
 covarianceMatrix = zeros(n,n,T);
 for k=1:T
     zk=z(:,k);                            % save actual state
     zV(:,k)  = zk;                         % save measurment
-    if(sigmaMigrationLimit == 0)
-        migrationFlag = 1;
-    else
-        migrationFlag = k;
-    end
-    [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax,sigmaMigrationLimit,Xprev,migrationFlag,nc+1);            % ekf
+    [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax);            % ekf
     sigmaPointAccumulutor(:,:,k) = Xprev;
     covarianceMatrix(:,:,k) = P;
     pmat(:,:,k) = P;
@@ -131,11 +125,34 @@ for k = 1:T
 end
 f=@(x,param) seirDynamics(x,dt);  % nonlinear state equations
 
-[M,Ps,S] = urts_smooth1(xV,pmat,f,Q,{dt});
-
+%
+% Run the smoother
+% copied from urts_smooth1
 % reassigning variables
-xV = M;
-pmat = P;
+% M = xV;
+% P = pmat;
+% 
+% D = zeros(size(M,1),size(M,1),size(M,2));
+% for k=(size(xV,2)-1):-1:1
+%     if isempty(param)
+%         params = [];
+%     elseif same_p
+%         params = param;
+%     else
+%         params = param{k};
+%     end
+%     [m_pred,P_pred,C] = ...
+%     ut_transform(M(:,k),P(:,:,k),a,params,alpha,beta,kappa);
+%     P_pred = P_pred + Q(:,:,k);
+%     D(:,:,k) = C / P_pred;
+%     M(:,k)   = M(:,k) + D(:,:,k) * (M(:,k+1) - m_pred);
+%     P(:,:,k) = P(:,:,k) + D(:,:,k) * (P(:,:,k+1) - P_pred) * D(:,:,k)';
+% end
+% 
+% 
+% [M,Ps,S] = urts_smooth1(xV,pmat,f,Q,{dt});
+
+
 save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 % remove outliers
 % for jj=1:n
@@ -147,9 +164,8 @@ save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 % end
 
 % for jj = 1:n
-% %     xV(jj,:) = filloutliers(xV(jj,:),'linear');
-% %     xV(jj,:)= smooth(xV(jj,:),7,'sgolay');
-%     
+%     xV(jj,:) = filloutliers(xV(jj,:),'linear');
+%     xV(jj,:)= smooth(xV(jj,:),7,'sgolay');
 % end
 
 % plot results
@@ -221,12 +237,6 @@ hold on;
 plot(sum(xV(1:12,:),1),'--')
 title('Total population')
 
-if sigmaMigrationLimit~= 0
-str = sprintf("sigma migration limit %0.6f",sigmaMigrationLimit);
-else
-str = sprintf("No migration limit");
-end
-sgtitle(str)
 
 %use fmincon optimal parameters
 %incorporate euler maryama inside the dynamics
@@ -234,10 +244,10 @@ sgtitle(str)
 
 figure(2); gcf; clf;
 
-legendStr={"\beta", "\eta_Ih", "\eta_Im", "\eta_Sm", "\eta_Sh", "\xi_2"  ...
+legendStr={"\beta", "\eta_{Ih}", "\eta_{Im}", "\eta_{Sm}", "\eta_{Sh}", "\xi_2"  ...
     , "\xi_1", "\alpha", "\phi_1", ...
-    "\phi_2", "\sigma_S", "\sigma_Sm", "\sigma_Sh",  ...
-    "\kappa_R", "\kappa_Rm", "\kappa_Rh", "\mu", "\gamma", "\epsilon"};
+    "\phi_2", "\sigma_S", "\sigma_{Sm}", "\sigma_{Sh}",  ...
+    "\kappa_R", "\kappa_{Rm}", "\kappa_{Rh}", "\mu", "\gamma", "\epsilon"};
 
 for ii = 1:np
 
@@ -248,7 +258,7 @@ hold on
 
 title(legendStr{ii});
 end
-sgtitle(str)
+
 
 
 figure(3); gcf; clf;
@@ -282,7 +292,7 @@ plot(1:size(xV,2),xV(9,:));
 title('Infectious')
 legend("I","I_m","I_h");
 
-sgtitle(str)
+% sgtitle(str)
 
 
 function [x_kp1] = seirDynamics(xk,dt)

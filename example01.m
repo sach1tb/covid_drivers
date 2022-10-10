@@ -14,21 +14,21 @@ function example01
 addpath /Users/sachit/Dropbox/EASeL/common/MYLIB/filtering
 
 
-infectious = csvread('infectiousIllinois.csv');
+infectious = csvread('data/infectiousIllinois.csv');
 infectious = infectious*(9.7/12.8);
 
-death = csvread('deathIllinois.csv');
+death = csvread('data/deathIllinois.csv');
 death(isnan(death))=0;
 death = cumsum(death);
 death = death*(9.7/12.8);
 
 
-vax = csvread('vaccinatedIllinois.csv');
+vax = csvread('data/vaccinatedIllinois.csv');
 vax(isnan(vax))=0;
 vax = vax*(9.7/12.8);
-mask= csvread('maskIllinois.csv');
+mask= csvread('data/maskIllinois.csv');
 
-mobility = csvread('mobilityIllinois.csv');
+mobility = csvread('data/mobilityIllinois.csv');
 
 Z=[infectious, death, vax, mask, mobility]';
 
@@ -80,7 +80,7 @@ T=size(Z,2);
 
 % ^^ number of particles (change this to see how it affects the
 % performance)
-N=1000; 
+N=100; 
 
 % particles n x N x T
 p=zeros(n,N,T);
@@ -242,25 +242,15 @@ wts=normpdf(Zh(1), Z(1), eta(1,1)).*...
 
 
 function z = seirObservation(xk)
-%[infectious,death,vax,mask,mobility]
-% x_kp1(1) =S;
-% x_kp1(2)=Sm;
-% x_kp1(3)=Sh;
-% x_kp1(4)=E ;
-% x_kp1(5)=Em;
-% x_kp1(6)=Eh;
-% x_kp1(7)=I ;
-% x_kp1(8)=Im;
-% x_kp1(9)=Ih;
-% x_kp1(10)=R ;
-% x_kp1(11)=D ;
-% x_kp1(12)=U ;
 
+totPop = sum(xk(1:12));
 z(1) = xk(7)+xk(8)+xk(9); %Infectious
 z(2) = xk(11); %death
-z(3) = xk(12); % Vax
-z(4) = (xk(2)+xk(5)+xk(8))/sum(sum(xk(1:12))); % Mask
-z(5) = -(xk(3)+xk(6)+xk(9))./(sum(xk(1:12))); % Mobility
+z(3) = xk(13); % Vax
+z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
+z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
+% z(6) = totPop; % population
+
 
 function [x_kp1] = seirDynamics(xk,dt)
 x_kp1=xk;

@@ -1,4 +1,4 @@
-function [x,P,Xnext]=ukfConstrained(fstate,x,P,hmeas,z,Q,R,sigmaLimitsMin,sigmaLimitsMax,sigmaMigrationLimit,Xprev,timeStepnumber,sigmaStart)
+function [x,P,Xnext]=ukfConstrained(fstate,x,P,hmeas,z,Q,R,sigmaLimitsMin,sigmaLimitsMax)
 % UKF   Unscented Kalman Filter for nonlinear dynamic systems
 % [x, P] = ukf(f,x,P,h,z,Q,R) returns state estimate, x and state covariance, P
 % for nonlinear dynamic system (for simplicity, noises are assumed as additive):
@@ -65,9 +65,6 @@ c=sqrt(c);
 try
     P=nearestSPD(P); % ideally this should go
     X=sigmas(x,P,c);                            %sigma points around x
-    if(timeStepnumber>1)
-        X = migrationLimit(Xprev,X,sigmaMigrationLimit,sigmaStart);
-    end
     X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax,P);          % constrain
 
 
@@ -75,9 +72,7 @@ catch
     keyboard
 end
 [x1,X1,P1,X2]=ut(fstate,X,Wm,Wc,L,Q);          %unscented transformation of process
-if(timeStepnumber>1)
-    X1 = migrationLimit(Xprev,X1,sigmaMigrationLimit,sigmaStart);
-end
+
 X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax,P);          % constrain
 % X1=sigmas(x1,P1,c);                         %sigma points around x1
 % X2=X1-x1(:,ones(1,size(X1,2)));             %deviation of X1
@@ -87,7 +82,8 @@ K=P12*inv(P2);
 x=x1+K*(z-z1);                              %state update
 P=P1-K*P12';                                %covariance update
 Xnext = X1;
-    function [y,Y,P,Y1]=ut(f,X,Wm,Wc,n,R)
+
+function [y,Y,P,Y1]=ut(f,X,Wm,Wc,n,R)
         %Unscented Transformation
         %Input:
         %        f: nonlinear map
@@ -126,22 +122,6 @@ A = c*chol(P)';
 Y = x(:,ones(1,numel(x)));
 X = [x Y+A Y-A];
 
-end
-
-function X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax,P)
-[len, npoints] = size(X);
-
-
-% Apply constraints
-for i = 1:len
-    for k = 1:npoints
-        if X(i,k) < sigmaLimitsMin(i)
-            X(i,k) = sigmaLimitsMin(i) + 0.01*sqrt(P(i,i));
-        elseif X(i,k) > sigmaLimitsMax(i)
-            X(i,k)  = sigmaLimitsMax(i) - 0.001*sqrt(P(i,i)) ;
-        end
-    end
-end
 end
 
 function Xnext = migrationLimit(Xprev,Xnext,sigmaMigrationLimit,sigmaStart)
