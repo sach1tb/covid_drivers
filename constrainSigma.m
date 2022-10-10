@@ -6,9 +6,9 @@ function X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax,P)
 for i = 1:len
     for k = 1:npoints
         if X(i,k) < sigmaLimitsMin(i)
-            X(i,k) = sigmaLimitsMin(i) + 0.01*sqrt(P(i,i));
+            X(i,k) = sigmaLimitsMin(i) + 0.00*sqrt(P(i,i));
         elseif X(i,k) > sigmaLimitsMax(i)
-            X(i,k)  = sigmaLimitsMax(i) - 0.001*sqrt(P(i,i)) ;
+            X(i,k)  = sigmaLimitsMax(i) - 0.000*sqrt(P(i,i)) ;
         end
     end
 end

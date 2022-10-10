@@ -163,10 +163,11 @@ save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 %     xV(jj,idx)=nan;
 % end
 
-% for jj = 1:n
-%     xV(jj,:) = filloutliers(xV(jj,:),'linear');
-%     xV(jj,:)= smooth(xV(jj,:),7,'sgolay');
-% end
+for jj = 1:n
+    xV(jj,:) = filloutliers(xV(jj,:),'linear',7); 
+    % smooth smoothens dynamocs as well
+    xV(jj,:)= smooth(xV(jj,:),28,'lowess');
+end
 
 % plot results
 figure(1); gcf; clf;
