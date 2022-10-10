@@ -14,7 +14,7 @@ for i = 1:size(P,1)
 end
 
 windowSizeDays = 56;
-nPoints = 10;
+nPoints = 5;
 TE_SmtoIm = zeros(nPoints,1001-windowSizeDays);
 CE_SmtoImS = zeros(nPoints,1001-windowSizeDays);
 CE_SmtoImSh = zeros(nPoints,1001-windowSizeDays);
@@ -22,6 +22,7 @@ CE_SmtoImSh = zeros(nPoints,1001-windowSizeDays);
 CE_Stot_Itot_condE = zeros(nPoints,1001-windowSizeDays);
 CE_Stot_Itot_condEm = zeros(nPoints,1001-windowSizeDays);
 CE_Stot_Itot_condEh = zeros(nPoints,1001-windowSizeDays);
+TE_Stot_Itot= zeros(nPoints,1001-windowSizeDays);
 % CE_SmtoImEm = zeros(nPoints,1001-windowSizeDays);
 % CE_SmtoImIm = zeros(nPoints,1001-windowSizeDays);
 for i =1:nPoints
@@ -44,12 +45,13 @@ for i =1:nPoints
     Itot = normalize(squeeze(xk(7,i,:))+squeeze(xk(8,i,:))+squeeze(xk(9,i,:))');
     for k = 1:1:1001-windowSizeDays
         %CE_ItoSE(i,k)= cte('hist',tempS,tempE,tempI,1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        TE_SmtoIm(i,k) = ete_hist(Sm(k:k+windowSizeDays-1),Im(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        CE_SmtoImS(i,k)= cte('hist',Im(k:k+windowSizeDays-1),Sm(k:k+windowSizeDays-1),S(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        CE_SmtoImSh(i,k) = cte('hist',Im(k:k+windowSizeDays-1),Sm(k:k+windowSizeDays-1),Sh(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        CE_Stot_Itot_condE(i,k) = cte('hist',Itot(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),E(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        CE_Stot_Itot_condEm(i,k) = cte('hist',Itot(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),Em(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        CE_Stot_Itot_condEh(i,k) = cte('hist',Itot(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),Eh(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+%         TE_SmtoIm(i,k) = ete_hist(Sm(k:k+windowSizeDays-1),Im(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+%         CE_SmtoImS(i,k)= cte('hist',Im(k:k+windowSizeDays-1),Sm(k:k+windowSizeDays-1),S(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+%         CE_SmtoImSh(i,k) = cte('hist',Im(k:k+windowSizeDays-1),Sm(k:k+windowSizeDays-1),Sh(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+        TE_Stot_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+        CE_Stot_Itot_condE(i,k) = cte('hist',Itot(k:k+windowSizeDays-1),E(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+        CE_Stot_Itot_condEm(i,k) = cte('hist',Itot(k:k+windowSizeDays-1),Em(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+        CE_Stot_Itot_condEh(i,k) = cte('hist',Itot(k:k+windowSizeDays-1),Eh(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         %CE_SmtoIEm(i,k) = cte('hist',I(k:k+windowSizeDays-1),Em(k:k+windowSizeDays-1),Sm(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         %CE_SmtoIIm(i,k) = cte('hist',I(k:k+windowSizeDays-1),Im(k:k+windowSizeDays-1),Sm(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
     end
@@ -165,6 +167,14 @@ set(gca, 'fontsize', 20);
 ylim([-inf inf]);
 grid on
 
+figure(4)
+clf;
+%TE_Stot_Itot
+meanTE_Stot_Itot = mean(TE_Stot_Itot);
+stdTE_Stot_Itot = std(TE_Stot_Itot);
+h1 = plot(meanTE_Stot_Itot,'-r');
+hold on
+boundedline(1:numel(meanTE_Stot_Itot),meanTE_Stot_Itot,stdTE_Stot_Itot, '-r','alpha','linewidth',1.2);
 
 % %%
 % meanCE_SmtoIE = mean(CE_SmtoIE);
