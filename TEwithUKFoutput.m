@@ -1,48 +1,57 @@
 clearvars
 
-addpath('..\..\..\boundedline\boundedline')
-addpath('..\..\..\Inpaint_nans')
-addpath('..\..\..\cteUpdatedFiles\')
+addpath('..\..\..\..\boundedline\boundedline')
+addpath('..\..\..\..\Inpaint_nans')
+addpath('cteUpdatedFiles\')
 
 load ukfOutput.mat  %size is 32, 32*2+1
-xkk = sigmaPointAccumulutor;
+sigmaPoints = sigmaPointAccumulutor;
 P = covarianceMatrix;
-meanValues = squeeze(xkk(:,1,:));
-xk = diff(xkk,1,3);
+meanValues = squeeze(sigmaPoints(:,1,:));
+dxk = diff(sigmaPoints,1,3);
+% stdSigmPoints
 for i = 1:size(P,1)
     stdOfMean(i,:) = sqrt(P(i,i,:));
 end
 
 windowSizeDays = 56;
-nPoints = 5;
-TE_SmtoIm = zeros(nPoints,1001-windowSizeDays);
-CE_SmtoImS = zeros(nPoints,1001-windowSizeDays);
-CE_SmtoImSh = zeros(nPoints,1001-windowSizeDays);
+nSigmaPoints = 5;
+TE_SmtoIm = zeros(nSigmaPoints,1001-windowSizeDays);
+CE_SmtoImS = zeros(nSigmaPoints,1001-windowSizeDays);
+CE_SmtoImSh = zeros(nSigmaPoints,1001-windowSizeDays);
 
-CE_Stot_Itot_condE = zeros(nPoints,1001-windowSizeDays);
-CE_Stot_Itot_condEm = zeros(nPoints,1001-windowSizeDays);
-CE_Stot_Itot_condEh = zeros(nPoints,1001-windowSizeDays);
-TE_Stot_Itot= zeros(nPoints,1001-windowSizeDays);
-% CE_SmtoImEm = zeros(nPoints,1001-windowSizeDays);
-% CE_SmtoImIm = zeros(nPoints,1001-windowSizeDays);
-for i =1:nPoints
+CE_Stot_Itot_condE = zeros(nSigmaPoints,1001-windowSizeDays);
+CE_Stot_Itot_condEm = zeros(nSigmaPoints,1001-windowSizeDays);
+CE_Stot_Itot_condEh = zeros(nSigmaPoints,1001-windowSizeDays);
+TE_Stot_Itot= zeros(nSigmaPoints,1001-windowSizeDays);
+% CE_SmtoImEm = zeros(nSigmaPoints,1001-windowSizeDays);
+% CE_SmtoImIm = zeros(nSigmaPoints,1001-windowSizeDays);
+for i =1:nSigmaPoints
 
     str = sprintf('Sigma Point # %d',i);
     disp(str);
-    % S = xk(1);Sm = xk(2);Sh= xk(3); E = xk(4);Em = xk(5);Eh = xk(6);I = xk(7);
-    % Im = xk(8); Ih = xk(9); R = xk(10); D = xk(11); U = xk(12); V = xk(13);
+    % S = dxk(1);Sm = dxk(2);Sh= dxk(3); E = dxk(4);Em = dxk(5);Eh = dxk(6);I = dxk(7);
+    % Im = dxk(8); Ih = dxk(9); R = dxk(10); D = dxk(11); U = dxk(12); V = dxk(13);
 
 
-    S = normalize(squeeze(xk(1,i,:)))';Sm = normalize(squeeze(xk(2,i,:)))';
-    Sh= normalize(squeeze(xk(3,i,:)))';
-    E = normalize(squeeze(xk(4,i,:)))';Em = normalize(squeeze(xk(5,i,:)))';
-    Eh = normalize(squeeze(xk(6,i,:)))';I = normalize(squeeze(xk(7,i,:)))';
-    Im = normalize(squeeze(xk(8,i,:)))';
-    Ih = normalize(squeeze(xk(9,i,:)))'; R = normalize(squeeze(xk(10,i,:)))';
-    D = normalize(squeeze(xk(11,i,:)))'; U = normalize(squeeze(xk(12,i,:)))';
-    V = normalize(squeeze(xk(13,i,:)))';
-    Stot = normalize(squeeze(xk(1,i,:))+squeeze(xk(2,i,:))+squeeze(xk(3,i,:))');
-    Itot = normalize(squeeze(xk(7,i,:))+squeeze(xk(8,i,:))+squeeze(xk(9,i,:))');
+    S = normalize(squeeze(dxk(1,i,:)))';
+    Sm = normalize(squeeze(dxk(2,i,:)))';
+    Sh= normalize(squeeze(dxk(3,i,:)))';
+
+    E = normalize(squeeze(dxk(4,i,:)))';
+    Em = normalize(squeeze(dxk(5,i,:)))';
+    Eh = normalize(squeeze(dxk(6,i,:)))';
+    
+    I = normalize(squeeze(dxk(7,i,:)))';
+    Im = normalize(squeeze(dxk(8,i,:)))';
+    Ih = normalize(squeeze(dxk(9,i,:)))';
+    
+    R = normalize(squeeze(dxk(10,i,:)))';
+    D = normalize(squeeze(dxk(11,i,:)))'; 
+    U = normalize(squeeze(dxk(12,i,:)))';
+    V = normalize(squeeze(dxk(13,i,:)))';
+    Stot = normalize(squeeze(dxk(1,i,:))+squeeze(dxk(2,i,:))+squeeze(dxk(3,i,:))');
+    Itot = normalize(squeeze(dxk(7,i,:))+squeeze(dxk(8,i,:))+squeeze(dxk(9,i,:))');
     for k = 1:1:1001-windowSizeDays
         %CE_ItoSE(i,k)= cte('hist',tempS,tempE,tempI,1,ceil(sqrt(windowSizeDays)),[-1 1]);
 %         TE_SmtoIm(i,k) = ete_hist(Sm(k:k+windowSizeDays-1),Im(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
@@ -104,32 +113,31 @@ clf;
 % CE_SmtoImS(i,k)
 % CE_SmtoImSh(i,k)
 
-meanTE_SmtoIm = mean(TE_SmtoIm);
-stdTE_SmtoIm = std(TE_SmtoIm);
-h1 = plot(meanTE_SmtoIm,'-r');
-hold on
-boundedline(1:numel(meanTE_SmtoIm),meanTE_SmtoIm,stdTE_SmtoIm, '-r','alpha','linewidth',1.2);
+% meanTE_SmtoIm = mean(TE_SmtoIm);
+% stdTE_SmtoIm = std(TE_SmtoIm);
+% h1 = plot(meanTE_SmtoIm,'-r');
+% hold on
+% boundedline(1:numel(meanTE_SmtoIm),meanTE_SmtoIm,stdTE_SmtoIm, '-r','alpha','linewidth',1.2);
+% 
+% meanCE_SmtoImS = mean(CE_SmtoImS);
+% stdCE_SmtoImS = std(CE_SmtoImS);
+% h2 = plot(meanCE_SmtoImS,'-g');
+% hold on
+% boundedline(1:numel(meanCE_SmtoImS),meanCE_SmtoImS,stdCE_SmtoImS, '-g','alpha','linewidth',1.2);
+% 
+% meanCE_SmtoImSh = mean(CE_SmtoImSh);
+% stdCE_SmtoImSh = std(CE_SmtoImSh);
+% h3 = plot(meanCE_SmtoImSh,'-b');
+% hold on
+% boundedline(1:numel(meanCE_SmtoImSh),meanCE_SmtoImSh,stdCE_SmtoImSh, '-b','alpha','linewidth',1.2);
 
-meanCE_SmtoImS = mean(CE_SmtoImS);
-stdCE_SmtoImS = std(CE_SmtoImS);
-h2 = plot(meanCE_SmtoImS,'-g');
-hold on
-boundedline(1:numel(meanCE_SmtoImS),meanCE_SmtoImS,stdCE_SmtoImS, '-g','alpha','linewidth',1.2);
-
-meanCE_SmtoImSh = mean(CE_SmtoImSh);
-stdCE_SmtoImSh = std(CE_SmtoImSh);
-h3 = plot(meanCE_SmtoImSh,'-b');
-hold on
-boundedline(1:numel(meanCE_SmtoImSh),meanCE_SmtoImSh,stdCE_SmtoImSh, '-b','alpha','linewidth',1.2);
-
-
-legend([h1,h2,h3],'$TE_{\dot{S}_m\rightarrow \dot{I}_m}$','$CTE_{\dot{S}_m\rightarrow \dot{I}_m | \dot{S}}$' ...
-    ,'$CTE_{\dot{S}_m\rightarrow \dot{I}_m | \dot{S}_h}$','interpreter','latex');
-ylabel('CTE (bits)');
-xlabel('Window #')
-set(gca, 'fontsize', 20);
-ylim([-inf inf]);
-grid on
+% legend([h1,h2,h3],'$TE_{\dot{S}_m\rightarrow \dot{I}_m}$','$CTE_{\dot{S}_m\rightarrow \dot{I}_m | \dot{S}}$' ...
+%     ,'$CTE_{\dot{S}_m\rightarrow \dot{I}_m | \dot{S}_h}$','interpreter','latex');
+% ylabel('CTE (bits)');
+% xlabel('Window #')
+% set(gca, 'fontsize', 20);
+% ylim([-inf inf]);
+% grid on
 
 
 
@@ -260,10 +268,10 @@ boundedline(1:numel(meanTE_Stot_Itot),meanTE_Stot_Itot,stdTE_Stot_Itot, '-r','al
 %
 % figure(3)
 % clf;
-% plot(squeeze(xkk(7,1,:))');
+% plot(squeeze(sigmaPoints(7,1,:))');
 % hold on
-% plot(squeeze(xkk(8,1,:))');
-% plot(squeeze(xkk(9,1,:))');
+% plot(squeeze(sigmaPoints(8,1,:))');
+% plot(squeeze(sigmaPoints(9,1,:))');
 % legend('I','Im','Ih');
 
 

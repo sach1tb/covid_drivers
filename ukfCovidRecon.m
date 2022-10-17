@@ -44,7 +44,7 @@ parameterInit = [beta0,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,xi_Sh0,xi_S0 ...
     kappa_Rh0, mu0, gamma0, epsilon0];
 
 % sigma limits for constrained ukf
-sigmaLimitsMax = [1e7*ones(1,nc), 0.8*ones(1,np)];
+sigmaLimitsMax = [1e7*ones(1,nc), ones(1,np)];
 sigmaLimitsMin = [0*ones(1,nc), 0*ones(1,np)];
 
 Q=diag([1e-6*ones(1,nc), 0.1*parameterInit]); % covariance of process
@@ -90,6 +90,10 @@ mobility =  mobility(1:T);
 dayStops = [1 332 697 1002]; 
 % data source https://www.statista.com/statistics/815172/chicago-metro-area-population/
 popChicagoMetro = [9684738 9601605 9509934 9433330]; 
+% macrotrends.net/cities/22956/chicago/population, United Nations- world pro
+% dayStops = [1 500 1002]; 
+% popChicagoMetro = [8865000 8877000 8901000]; 
+
 
 xV = zeros(n,T);          %estmate        % allocate memory
 sV = zeros(n,T);          %actual
@@ -115,6 +119,7 @@ for k=1:T
     sigmaPointAccumulutor(:,:,k) = Xprev;
     covarianceMatrix(:,:,k) = P;
     pmat(:,:,k) = P;
+%     x = constrainSigma(x,sigmaLimitsMin,sigmaLimitsMax);
     xV(:,k) = x;                            % save estimate
     disp(k);
 end
@@ -164,9 +169,9 @@ save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 % end
 
 for jj = 1:n
-    xV(jj,:) = filloutliers(xV(jj,:),'linear',7); 
+%     xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
     % smooth smoothens dynamocs as well
-    xV(jj,:)= smooth(xV(jj,:),28,'lowess');
+    xV(jj,:)= smooth(xV(jj,:),14,'lowess');
 end
 
 % plot results
@@ -348,7 +353,7 @@ kappa_Rh= xk(29);
 mu = xk(30);
 gamma = xk(31);
 epsilon = xk(32);
-n = 100;
+n = 1000;
 Dt = dt/n;
 
 
