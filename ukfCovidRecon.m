@@ -8,6 +8,7 @@ nc=13; np=19;
 n=nc+np;%number of state
 m = 6; %number of measurements
 dt = 1;
+ddt= dt/10; % smaller timestep for stable dynamics
 % infection count is not accurate [ ref?]
 % death is accurate
 % vaccination is accurate
@@ -58,34 +59,37 @@ P = Q;                        % initial state covraiance
                                     % total dynamic steps
 
  
-% readData
+% data/observations
 
 infectious = csvread('data/infectiousIllinois.csv');
 infectious(isnan(infectious))=0;
 infectious = infectious*(9.7/12.8);
-
 T=size(infectious, 1);
+
+infectious = interp1(1:dt:T, infectious, 1:ddt:T);
+
+days = 1:1:T;
 
 death = csvread('data/deathIllinois.csv');
 death(isnan(death))=0;
 death = cumsum(death);
 death = death*(9.7/12.8);
-
+death = interp1(1:dt:T, death, 1:ddt:T);
 
 vax = csvread('data/vaccinatedIllinois.csv');
-
 vax(isnan(vax))=0;
 vax = vax*(9.7/12.8);
+vax = interp1(1:dt:T, vax, 1:ddt:T);
+
+
 mask= csvread('data/maskIllinois.csv');
+mask = interp1(1:dt:T, mask, 1:ddt:T);
+
 
 mobility = csvread('data/mobilityIllinois.csv');
 mobility(isnan(mobility))=0;
+mobility = interp1(1:dt:T, mobility, 1:ddt:T);
 
-death = death(1:T);
-vax = vax(1:T);
-infectious =  infectious(1:T);
-mask =  mask(1:T);
-mobility =  mobility(1:T);
 
 dayStops = [1 332 697 1002]; 
 % data source https://www.statista.com/statistics/815172/chicago-metro-area-population/
@@ -93,6 +97,21 @@ popChicagoMetro = [9684738 9601605 9509934 9433330];
 % macrotrends.net/cities/22956/chicago/population, United Nations- world pro
 % dayStops = [1 500 1002]; 
 % popChicagoMetro = [8865000 8877000 8901000]; 
+popDays = interp1(dayStops,popChicagoMetro,days);
+popDays = interp1(1:dt:T, popDays, 1:ddt:T);
+
+
+T=size(infectious, 2);
+% clip off everything 
+% death = death(1:T);
+% vax = vax(1:T);
+% infectious =  infectious(1:T);
+% mask =  mask(1:T);
+% mobility =  mobility(1:T);
+
+
+
+
 
 
 xV = zeros(n,T);          %estmate        % allocate memory
@@ -100,11 +119,7 @@ sV = zeros(n,T);          %actual
 zV = zeros(m,T);
 
 
-days = 1:1:T;
-popDays = interp1(dayStops,popChicagoMetro,days);
-
-totPopulation = popDays';
-z = [infectious';death';vax';mask';mobility';totPopulation']; % measurements
+z = [infectious;death;vax;mask;mobility;popDays]; % measurements
 
 
 
@@ -125,10 +140,10 @@ for k=1:T
 end
 
 % Run smoother
-for k = 1:T
-    pmat(:,:,k)=nearestSPD(pmat(:,:,k));
-end
-f=@(x,param) seirDynamics(x,dt);  % nonlinear state equations
+% for k = 1:T
+%     pmat(:,:,k)=nearestSPD(pmat(:,:,k));
+% end
+% f=@(x,param) seirDynamics(x,dt);  % nonlinear state equations
 
 %
 % Run the smoother
@@ -171,7 +186,7 @@ save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 for jj = 1:n
 %     xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
     % smooth smoothens dynamocs as well
-    xV(jj,:)= smooth(xV(jj,:),14,'lowess');
+%     xV(jj,:)= smooth(xV(jj,:),14,'lowess');
 end
 
 % plot results
@@ -238,7 +253,7 @@ plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 title('Mobility')
 
 subplot(3,3,9)
-plot(totPopulation,'-');
+plot(popDays,'-');
 hold on;
 plot(sum(xV(1:12,:),1),'--')
 title('Total population')
@@ -353,7 +368,7 @@ kappa_Rh= xk(29);
 mu = xk(30);
 gamma = xk(31);
 epsilon = xk(32);
-n = 1000;
+n = 10;
 Dt = dt/n;
 
 
