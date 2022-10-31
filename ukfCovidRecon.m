@@ -4,7 +4,7 @@ addpath(['..', filesep, 'boundedline', filesep, 'boundedline'])
 addpath(['..', filesep, 'boundedline', filesep, 'Inpaint_nans'])
 
 
-nc=13; np=19;
+nc=13; np=11;
 n=nc+np;%number of state
 m = 6; %number of measurements
 dt = 1;
@@ -15,7 +15,7 @@ ddt= dt/10; % smaller timestep for stable dynamics
 % mask is not accurate
 % mobility is not accurate
 % population is acccurate [census?]
-R=diag([1000,100,1000,0.3,10,500]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
+R=diag([1000,100,1000,0.2,10,500]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
 %-- fmnincon optimal parameters
 beta0 = 0.5;
@@ -29,9 +29,11 @@ eta_Sm0 = 0.1;
 kappa_R0 = 0.1;
 kappa_Rm0 = 0.1;
 kappa_Rh0 = 0.1;
+kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
 sigma_S0 = 0.0001;
 sigma_Sm0 = 0.0001;
 sigma_Sh0 = 0.0001;
+sigma0=sigma_S0; % because all sigmas are same
 alpha0 = 0.0246;
 
 phi_Sm0 = 0.01;
@@ -40,16 +42,21 @@ xi_Sh0 = 0.001;
 xi_S0 = 0.001;
 
 % initial estimate
-parameterInit = [beta0,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,xi_Sh0,xi_S0 ...
-    alpha0,phi_Sm0,phi_S0,sigma_S0,sigma_Sm0,sigma_Sh0,kappa_R0,kappa_Rm0 ...
-    kappa_Rh0, mu0, gamma0, epsilon0];
+% parameterInit = [beta0,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,xi_Sh0,xi_S0 ...
+%     alpha0,phi_Sm0,phi_S0,sigma_S0,sigma_Sm0,sigma_Sh0,kappa_R0,kappa_Rm0 ...
+%     kappa_Rh0, mu0, gamma0, epsilon0];
+
+parameterInit = [beta0,xi_Sh0,xi_S0 ...
+    alpha0,phi_Sm0,phi_S0,sigma0,kappa0, ...
+    mu0, gamma0, epsilon0];
+
 
 % sigma limits for constrained ukf
 sigmaLimitsMax = [1e7*ones(1,nc), ones(1,np)];
 sigmaLimitsMin = [0*ones(1,nc), 0*ones(1,np)];
 
 Q=diag([1e-6*ones(1,nc), 0.1*parameterInit]); % covariance of process
-f=@(x) seirDynamics(x,dt);  % nonlinear state equations
+f=@(x) seirDynamics(x,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,dt);  % nonlinear state equations
 h=@(x) seirObservation(x);                               % measurement equation
 s=[zeros(1,nc),parameterInit]';  %
 s(1) = 9684738-24; %9.7e6-24; % initial state susceptible
@@ -134,6 +141,9 @@ for k=1:T
     sigmaPointAccumulutor(:,:,k) = Xprev;
     covarianceMatrix(:,:,k) = P;
     pmat(:,:,k) = P;
+%     npx=x(nc+1:end);
+%     npx(npx<0)=0;
+%     x(nc+1:end)=npx;
 %     x = constrainSigma(x,sigmaLimitsMin,sigmaLimitsMax);
     xV(:,k) = x;                            % save estimate
     disp(k);
@@ -186,7 +196,7 @@ save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 for jj = 1:n
 %     xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
     % smooth smoothens dynamocs as well
-%     xV(jj,:)= smooth(xV(jj,:),14,'lowess');
+    xV(jj,:)= smooth(xV(jj,:),14,'lowess');
 end
 
 % plot results
@@ -265,14 +275,19 @@ title('Total population')
 
 figure(2); gcf; clf;
 
-legendStr={"\beta", "\eta_{Ih}", "\eta_{Im}", "\eta_{Sm}", "\eta_{Sh}", "\xi_2"  ...
+% legendStr={"\beta", "\eta_{Ih}", "\eta_{Im}", "\eta_{Sm}", "\eta_{Sh}", "\xi_2"  ...
+%     , "\xi_1", "\alpha", "\phi_1", ...
+%     "\phi_2", "\sigma_S", "\sigma_{Sm}", "\sigma_{Sh}",  ...
+%     "\kappa_R", "\kappa_{Rm}", "\kappa_{Rh}", "\mu", "\gamma", "\epsilon"};
+
+legendStr={"\beta", "\xi_2"  ...
     , "\xi_1", "\alpha", "\phi_1", ...
-    "\phi_2", "\sigma_S", "\sigma_{Sm}", "\sigma_{Sh}",  ...
-    "\kappa_R", "\kappa_{Rm}", "\kappa_{Rh}", "\mu", "\gamma", "\epsilon"};
+    "\phi_2", "\sigma",  ...
+    "\kappa", "\mu", "\gamma", "\epsilon"};
 
 for ii = 1:np
 
-subplot(4,5,ii);
+subplot(3,4,ii);
 
 plot(xV(ii+nc,:)) ;
 hold on
@@ -316,7 +331,7 @@ legend("I","I_m","I_h");
 % sgtitle(str)
 
 
-function [x_kp1] = seirDynamics(xk,dt)
+function [x_kp1] = seirDynamics(xk,eta_Ih,eta_Im,eta_Sm,eta_Sh,dt)
 x_kp1=xk;
 
 S = xk(1);
@@ -334,41 +349,41 @@ U = xk(12);
 V = xk(13);
 
 beta = xk(14);
-eta_Ih = xk(15);
-eta_Im = xk(16);
-eta_Sm = xk(17);
-eta_Sh = xk(18);
+% eta_Ih = xk(15);
+% eta_Im = xk(16);
+% eta_Sm = xk(17);
+% eta_Sh = xk(18);
 
-xi_Sh = xk(19);
-xi_Eh = xk(19);
-xi_Ih = xk(19);
+xi_Sh = xk(15);
+xi_Eh = xk(15);
+xi_Ih = xk(15);
 
-xi_S = xk(20);
-xi_E = xk(20);
-xi_I = xk(20);
+xi_S = xk(16);
+xi_E = xk(16);
+xi_I = xk(16);
 
-alpha = xk(21);
+alpha = xk(17);
 
-phi_Sm = xk(22);
-phi_Em = xk(22);
-phi_Im = xk(22);
+phi_Sm = xk(18);
+phi_Em = xk(18);
+phi_Im = xk(18);
 
-phi_S = xk(23);
-phi_E = xk(23);
-phi_I = xk(23);
+phi_S = xk(19);
+phi_E = xk(19);
+phi_I = xk(19);
 
-sigma_S = xk(24);
-sigma_Sm = xk(25);
-sigma_Sh = xk(26);
+sigma_S = xk(20)*S/(S+Sh+Sm);
+sigma_Sm = xk(20)*Sm/(S+Sh+Sm);
+sigma_Sh = xk(20)*Sh/(S+Sh+Sm);
 
-kappa_R= xk(27);
-kappa_Rm= xk(28);
-kappa_Rh= xk(29);
+kappa_R= xk(21)*S/(S+Sh+Sm);
+kappa_Rm= xk(21)*Sm/(S+Sh+Sm);
+kappa_Rh= xk(21)*Sh/(S+Sh+Sm);
 
-mu = xk(30);
-gamma = xk(31);
-epsilon = xk(32);
-n = 10;
+mu = xk(22);
+gamma = xk(23);
+epsilon = xk(24);
+n = 100;
 Dt = dt/n;
 
 
