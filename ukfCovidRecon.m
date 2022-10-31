@@ -8,14 +8,14 @@ nc=13; np=11;
 n=nc+np;%number of state
 m = 6; %number of measurements
 dt = 1;
-ddt= dt/10; % smaller timestep for stable dynamics
+ddt= dt; % smaller timestep for stable dynamics
 % infection count is not accurate [ ref?]
 % death is accurate
 % vaccination is accurate
 % mask is not accurate
 % mobility is not accurate
 % population is acccurate [census?]
-R=diag([1000,100,1000,0.2,10,500]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
+R=diag([1000,100,1000,0.3,10,1000]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
 %-- fmnincon optimal parameters
 beta0 = 0.5;
@@ -383,7 +383,7 @@ kappa_Rh= xk(21)*Sh/(S+Sh+Sm);
 mu = xk(22);
 gamma = xk(23);
 epsilon = xk(24);
-n = 100;
+n = 1000;
 Dt = dt/n;
 
 
