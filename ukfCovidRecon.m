@@ -252,20 +252,20 @@ subplot(3,3,7)
 plot(mask,'-');
 hold on
 % plot((xV(2,:)+xV(5,:)+xV(8,:))./sum(xV(1:12,:),1) ,'--')
-plot((xV(2,:)+xV(5,:)+xV(8,:))./sum(xV(1:12,:),1) ,'--')
+plot((xV(2,:)+xV(5,:)+xV(8,:))./sum(xV([1:10,12],:),1) ,'--')
 title('Masked')
 
 subplot(3,3,8)
 plot(mobility,'-');
 hold on
 % plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
-plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
+plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV([1:10,12],:),1),'--')
 title('Mobility')
 
 subplot(3,3,9)
 plot(popDays,'-');
 hold on;
-plot(sum(xV(1:12,:),1),'--')
+plot(sum(xV([1:10, 12],:),1),'--')
 title('Total population')
 
 
@@ -388,7 +388,7 @@ Dt = dt/n;
 
 
 for i = 1:n
-    T = S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+D+U;
+    T = S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+U;
     lambda = (beta/T)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_m = (beta/T)*(1-eta_Sm)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
     lambda_h = (beta/T)*(1-eta_Sh)*(I+(1-eta_Ih)*Ih+(1-eta_Im)*Im);
