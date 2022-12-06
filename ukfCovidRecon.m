@@ -15,12 +15,12 @@ ddt= dt; % smaller timestep for stable dynamics
 % mask is not accurate
 % mobility is not accurate
 % population is acccurate [census?]
-R=diag([1000,100,1000,0.3,10,1000]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
+R=diag([1000,100,500,0.3,10,1000]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
 %-- fmnincon optimal parameters
 beta0 = 0.5;
 mu0 = 2e-4;
-epsilon0 = 0.8; %1.0 - optimised
+epsilon0 = 1.0; %1.0 - optimised
 gamma0 = 0.0110;
 eta_Ih0 = 0.1;
 eta_Im0 = 0.1;
@@ -280,10 +280,10 @@ figure(2); gcf; clf;
 %     "\phi_2", "\sigma_S", "\sigma_{Sm}", "\sigma_{Sh}",  ...
 %     "\kappa_R", "\kappa_{Rm}", "\kappa_{Rh}", "\mu", "\gamma", "\epsilon"};
 
-legendStr={"\beta", "\xi_2"  ...
-    , "\xi_1", "\alpha", "\phi_1", ...
-    "\phi_2", "\sigma",  ...
-    "\kappa", "\mu", "\gamma", "\epsilon"};
+legendStr={"\beta", "\xi_2 (isolation)"  ...
+    , "\xi_1 (mobility)", "\alpha (Vax)", "\phi_1 (Masking)", ...
+    "\phi_2 (unmasking)", "\sigma (Vax lost)",  ...
+    "\kappa (Imm lost)", "\mu (mortality)", "\gamma (Rec rate)", "\epsilon (E to I)"};
 
 for ii = 1:np
 
@@ -371,7 +371,8 @@ phi_Im = xk(18);
 phi_S = xk(19);
 phi_E = xk(19);
 phi_I = xk(19);
-
+% sigma is a single value and is scaled with the proportion of the
+% susceptible population
 sigma_S = xk(20)*S/(S+Sh+Sm);
 sigma_Sm = xk(20)*Sm/(S+Sh+Sm);
 sigma_Sh = xk(20)*Sh/(S+Sh+Sm);

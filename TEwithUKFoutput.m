@@ -14,7 +14,9 @@ for i = 1:size(P,1)
     stdOfMean(i,:) = sqrt(P(i,i,:));
 end
 
+% window size for TE
 windowSizeDays = 56;
+% # of samples from the UKF
 nSigmaPoints = 5;
 TE_SmtoIm = zeros(nSigmaPoints,1001-windowSizeDays);
 CE_SmtoImS = zeros(nSigmaPoints,1001-windowSizeDays);
