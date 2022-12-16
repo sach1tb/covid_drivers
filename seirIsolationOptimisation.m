@@ -91,7 +91,7 @@ objective(xopt)
 plotResults(xopt, weights,error)
 
 function obj = objective(params)
-global infectious death mask vax maxT numParts mobility  weights
+global infectious death mask vax maxT mobility  weights
 global error iterCounter
 tspan = 0:1:maxT-1;
 dt = 1;

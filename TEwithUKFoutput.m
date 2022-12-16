@@ -4,7 +4,7 @@ addpath('..\..\..\..\boundedline\boundedline')
 addpath('..\..\..\..\Inpaint_nans')
 addpath('cteUpdatedFiles\')
 
-load ukfOutput.mat  %size is 32, 32*2+1
+load ukfOutput.mat  %size is 24, 24*2+1
 sigmaPoints = sigmaPointAccumulutor;
 datasetLength = size(sigmaPointAccumulutor,3);
 P = covarianceMatrix;
@@ -15,7 +15,7 @@ dxk = diff(sigmaPoints,1,3);
 % window size for TE
 windowSizeDays = 12*7;
 % # of samples from the UKF
-nSigmaPoints = 5;
+nSigmaPoints = 2;
 
 CE_Stot_Itot_condE = zeros(nSigmaPoints,datasetLength-windowSizeDays); % (CE_X_Y_Z) conditional TE X->Y conditioned on Z
 CE_Stot_Itot_condEm = zeros(nSigmaPoints,datasetLength-windowSizeDays);
@@ -26,7 +26,7 @@ for i =1:nSigmaPoints
 
     str = sprintf('Sigma Point # %d',i);
     disp(str);
-
+    %normalizing over the whole dataset length
     S = normalize(squeeze(dxk(1,i,:)))';
     Sm = normalize(squeeze(dxk(2,i,:)))';
     Sh= normalize(squeeze(dxk(3,i,:)))';
@@ -54,6 +54,12 @@ for i =1:nSigmaPoints
 
     end
 
+end
+
+% stdSigmPoints
+stdOfMean = zeros(size(sigmaPoints,1),size(sigmaPoints,3));
+for i = 1:size(P,1)
+    stdOfMean(i,:) = sqrt(P(i,i,:));
 end
 
 %% SEI mean plots with std
