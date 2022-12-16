@@ -1,20 +1,19 @@
 function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,phi_1,phi_2,xi_1,xi_2,lambda,lambda_m,lambda_h,alpha,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm ...
     ,kappa_R,kappa_Rm,kappa_Rh] ...
     = seir_simIsolation( ...
-    S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,sigma_ShVector, sigma_SVector, sigma_SmVector, xi1Vector, xi2Vector, phi1Vector, phi2Vector ...
-        ,kappa_RhVector, kappa_RVector, kappa_RmVector, ...
-        gammaVector, muVector, alphaVector ...
-        , epsilonVector, betaVector,eta_Ih,eta_Im,eta_Sh,eta_Sm,t1, t2, t3, t4, t5, t6, currentDay )
+    S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,Vp,N,sigma_ShVector, sigma_SVector, sigma_SmVector, xi1Vector, xi2Vector, phi1Vector, phi2Vector, ...
+        gammaVector, muVector,kappa_RhVector, kappa_RVector, kappa_RmVector, alphaVector, ...
+        epsilonVector, betaVector,eta_Ih,eta_Im,eta_Sh,eta_Sm,t1, t2, t3, t4, t5, t6, currentDay )
 
 
 
 %%
 % sigma_Sh, sigma_S, sigma_Sm : t1 t2
 % xi1, xi2, phi1, phi2 : t3 t4 t5
-% kappa_Rh, kappa_R, kappa_Rm : t6  ...10
 % gamma, mu : t1 t2
+% kappa_Rh, kappa_R, kappa_Rm : t6
 % alpha, epsilon : t1 t2
-% beta : t1 t2  ...15
+% beta : t1 t2 
 % eta_Ih, eta_Im, eta_Sh,eta_Sm
 %%
 
@@ -27,11 +26,11 @@ xi_1 = piecewiseContinuous(xi1Vector,[t3,t4,t5],currentDay);
 xi_2 = piecewiseContinuous(xi2Vector,[t3,t4,t5],currentDay);
 phi_1 = piecewiseContinuous(phi1Vector,[t3,t4,t5],currentDay);
 phi_2 = piecewiseContinuous(phi2Vector,[t3,t4,t5],currentDay);
+gamma = piecewiseContinuous(gammaVector,[t1, t2],currentDay);
+mu = piecewiseContinuous(muVector,[t1, t2],currentDay);
 kappa_Rh = piecewiseContinuous(kappa_RhVector,[t6],currentDay);
 kappa_R = piecewiseContinuous(kappa_RVector,[t6],currentDay);
 kappa_Rm = piecewiseContinuous(kappa_RmVector,[t6],currentDay);
-gamma = piecewiseContinuous(gammaVector,[t1, t2],currentDay);
-mu = piecewiseContinuous(muVector,[t1, t2],currentDay);
 alpha = piecewiseContinuous(alphaVector,[t1, t2],currentDay);
 epsilon = piecewiseContinuous(epsilonVector,[t1, t2],currentDay);
 beta = piecewiseContinuous(betaVector,[t1, t2],currentDay);

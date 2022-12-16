@@ -2,49 +2,41 @@ clearvars
 % close all
 addpath(['..', filesep, 'boundedline', filesep, 'boundedline'])
 addpath(['..', filesep, 'boundedline', filesep, 'Inpaint_nans'])
-
+load fminconOptimisedParameters.mat
 
 nc=13; np=11;
 n=nc+np;%number of state
 m = 6; %number of measurements
 dt = 1;
 ddt= dt; % smaller timestep for stable dynamics
-% infection count is not accurate [ ref?]
-% death is accurate
-% vaccination is accurate
-% mask is not accurate
-% mobility is not accurate
-% population is acccurate [census?]
+
 R=diag([1000,100,500,0.3,10,1000]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
-%-- fmnincon optimal parameters
-beta0 = 0.5;
-mu0 = 2e-4;
-epsilon0 = 1.0; %1.0 - optimised
-gamma0 = 0.0110;
-eta_Ih0 = 0.1;
-eta_Im0 = 0.1;
-eta_Sh0 = 0.1;
-eta_Sm0 = 0.1;
-kappa_R0 = 0.1;
-kappa_Rm0 = 0.1;
-kappa_Rh0 = 0.1;
+%-- fmnincon optimal parameters (taking the first element of each parameter vector)
+beta0 = modelParams.betaVector(1)*0.01;
+mu0 = modelParams.muVector(1)*0.01;
+epsilon0 = modelParams.epsilonVector(1)*0.01; %1.0 - optimised
+gamma0 = modelParams.gammaVector(1)*0.01;
+eta_Ih0 = modelParams.eta_Ih(1)*0.01;
+eta_Im0 = modelParams.eta_Im(1)*0.01;
+eta_Sh0 = modelParams.eta_Sh(1)*0.001;
+eta_Sm0 = modelParams.eta_Sm(1)*0.01;
+kappa_R0 = modelParams.kappa_RVector(1)*0.001;
+kappa_Rm0 = modelParams.kappa_RmVector(1)*0.01;
+kappa_Rh0 = modelParams.kappa_RhVector(1)*0.01;
 kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
-sigma_S0 = 0.0001;
-sigma_Sm0 = 0.0001;
-sigma_Sh0 = 0.0001;
+sigma_S0 = modelParams.sigma_SVector(1)*0.01;
+sigma_Sm0 = modelParams.sigma_SmVector(1)*0.01;
+sigma_Sh0 = modelParams.sigma_ShVector(1)*0.01;
 sigma0=sigma_S0; % because all sigmas are same
 alpha0 = 0.0246;
 
-phi_Sm0 = 0.01;
-phi_S0 = 0.05;
-xi_Sh0 = 0.001;
-xi_S0 = 0.001;
+phi_Sm0 = modelParams.phi1Vector(1)*0.01;
+phi_S0 = modelParams.phi2Vector(1)*0.01;
+xi_Sh0 = modelParams.xi2Vector(1)*0.01;
+xi_S0 = modelParams.xi1Vector(1)*0.01;
 
 % initial estimate
-% parameterInit = [beta0,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,xi_Sh0,xi_S0 ...
-%     alpha0,phi_Sm0,phi_S0,sigma_S0,sigma_Sm0,sigma_Sh0,kappa_R0,kappa_Rm0 ...
-%     kappa_Rh0, mu0, gamma0, epsilon0];
 
 parameterInit = [beta0,xi_Sh0,xi_S0 ...
     alpha0,phi_Sm0,phi_S0,sigma0,kappa0, ...
@@ -101,34 +93,18 @@ mobility = interp1(1:dt:T, mobility, 1:ddt:T);
 dayStops = [1 332 697 1002]; 
 % data source https://www.statista.com/statistics/815172/chicago-metro-area-population/
 popChicagoMetro = [9684738 9601605 9509934 9433330]; 
-% macrotrends.net/cities/22956/chicago/population, United Nations- world pro
-% dayStops = [1 500 1002]; 
-% popChicagoMetro = [8865000 8877000 8901000]; 
+
 popDays = interp1(dayStops,popChicagoMetro,days);
 popDays = interp1(1:dt:T, popDays, 1:ddt:T);
 
 
 T=size(infectious, 2);
-% clip off everything 
-% death = death(1:T);
-% vax = vax(1:T);
-% infectious =  infectious(1:T);
-% mask =  mask(1:T);
-% mobility =  mobility(1:T);
-
-
-
-
-
 
 xV = zeros(n,T);          %estmate        % allocate memory
 sV = zeros(n,T);          %actual
 zV = zeros(m,T);
 
-
 z = [infectious;death;vax;mask;mobility;popDays]; % measurements
-
-
 
 pmat = zeros(n,n,T);
 Xprev = zeros((np+nc),2*(np+nc)+1);
@@ -141,78 +117,33 @@ for k=1:T
     sigmaPointAccumulutor(:,:,k) = Xprev;
     covarianceMatrix(:,:,k) = P;
     pmat(:,:,k) = P;
-%     npx=x(nc+1:end);
-%     npx(npx<0)=0;
-%     x(nc+1:end)=npx;
-%     x = constrainSigma(x,sigmaLimitsMin,sigmaLimitsMax);
     xV(:,k) = x;                            % save estimate
     disp(k);
 end
 
-% Run smoother
-% for k = 1:T
-%     pmat(:,:,k)=nearestSPD(pmat(:,:,k));
-% end
-% f=@(x,param) seirDynamics(x,dt);  % nonlinear state equations
-
-%
-% Run the smoother
-% copied from urts_smooth1
-% reassigning variables
-% M = xV;
-% P = pmat;
-% 
-% D = zeros(size(M,1),size(M,1),size(M,2));
-% for k=(size(xV,2)-1):-1:1
-%     if isempty(param)
-%         params = [];
-%     elseif same_p
-%         params = param;
-%     else
-%         params = param{k};
-%     end
-%     [m_pred,P_pred,C] = ...
-%     ut_transform(M(:,k),P(:,:,k),a,params,alpha,beta,kappa);
-%     P_pred = P_pred + Q(:,:,k);
-%     D(:,:,k) = C / P_pred;
-%     M(:,k)   = M(:,k) + D(:,:,k) * (M(:,k+1) - m_pred);
-%     P(:,:,k) = P(:,:,k) + D(:,:,k) * (P(:,:,k+1) - P_pred) * D(:,:,k)';
-% end
-% 
-% 
-% [M,Ps,S] = urts_smooth1(xV,pmat,f,Q,{dt});
 
 
 save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
-% remove outliers
-% for jj=1:n
-%     mu=mean(xV(jj,:));
-%     st=std(xV(jj,:));
-%
-%     idx=xV(jj,:)>mu+2*st|xV(jj,:)<mu-2*st;
-%     xV(jj,idx)=nan;
-% end
 
+% Post calculation filters (smoothing and outlier removal)
 for jj = 1:n
-%     xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
+    % xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
     % smooth smoothens dynamocs as well
     xV(jj,:)= smooth(xV(jj,:),14,'lowess');
 end
 
-% plot results
+%% plot results
 figure(1); gcf; clf;
 
 subplot(3,3,1)
 
-% plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 
 plot(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)),'--')
-%boundedline(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)), sqrt(squeeze(pmat(1,1,:))))
+
 title('Susceptible')
 
 subplot(3,3,2)
 
-% plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
 plot((xV(4,:)+xV(5,:)+xV(6,:)),'--')
 title('Exposed')
 
@@ -221,7 +152,6 @@ plot(infectious,'-','Color','g');
 hold on
 plot(xV(7,:)+xV(8,:)+xV(9,:),'--','Color','r','LineWidth',1.4)
 
-%boundedline(1:size(xV,2),(xV(7,:)+xV(8,:)+xV(9,:)), sqrt(squeeze(pmat(7,7,:))))
 title('Infectious')
 
 
@@ -230,35 +160,34 @@ plot(xV(10,:),'--')
 title('Recovered')
 
 subplot(3,3,5)
-% plot(zV(2,:),'-');
+
 plot(death,'-');
 
 hold on
 plot(xV(11,:),'--','Color','r')
-%boundedline(1:size(xV,2),xV(11,:), sqrt(squeeze(pmat(11,11,:))))
-title('Deaths')
 
+title('Deaths')
 
 
 subplot(3,3,6)
 plot(vax,'-');
 hold on
 plot(xV(13,:),'--')
-%boundedline(1:size(xV,2),xV(13,:), sqrt(squeeze(pmat(13,13,:))))
+
 title('Vaccinated')
 
 
 subplot(3,3,7)
 plot(mask,'-');
 hold on
-% plot((xV(2,:)+xV(5,:)+xV(8,:))./sum(xV(1:12,:),1) ,'--')
+
 plot((xV(2,:)+xV(5,:)+xV(8,:))./sum(xV([1:10,12],:),1) ,'--')
 title('Masked')
 
 subplot(3,3,8)
 plot(mobility,'-');
 hold on
-% plot(-(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV(1:12,:),1),'--')
+
 plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV([1:10,12],:),1),'--')
 title('Mobility')
 
@@ -269,16 +198,9 @@ plot(sum(xV([1:10, 12],:),1),'--')
 title('Total population')
 
 
-%use fmincon optimal parameters
-%incorporate euler maryama inside the dynamics
-%
 
 figure(2); gcf; clf;
 
-% legendStr={"\beta", "\eta_{Ih}", "\eta_{Im}", "\eta_{Sm}", "\eta_{Sh}", "\xi_2"  ...
-%     , "\xi_1", "\alpha", "\phi_1", ...
-%     "\phi_2", "\sigma_S", "\sigma_{Sm}", "\sigma_{Sh}",  ...
-%     "\kappa_R", "\kappa_{Rm}", "\kappa_{Rh}", "\mu", "\gamma", "\epsilon"};
 
 legendStr={"\beta", "\xi_2 (isolation)"  ...
     , "\xi_1 (mobility)", "\alpha (Vax)", "\phi_1 (Masking)", ...
@@ -327,13 +249,11 @@ plot(1:size(xV,2),xV(8,:));
 plot(1:size(xV,2),xV(9,:));
 title('Infectious')
 legend("I","I_m","I_h");
-
-% sgtitle(str)
-
+%%
 
 function [x_kp1] = seirDynamics(xk,eta_Ih,eta_Im,eta_Sm,eta_Sh,dt)
 x_kp1=xk;
-
+% state variables
 S = xk(1);
 Sm = xk(2);
 Sh= xk(3);
@@ -349,10 +269,6 @@ U = xk(12);
 V = xk(13);
 
 beta = xk(14);
-% eta_Ih = xk(15);
-% eta_Im = xk(16);
-% eta_Sm = xk(17);
-% eta_Sh = xk(18);
 
 xi_Sh = xk(15);
 xi_Eh = xk(15);
@@ -411,6 +327,8 @@ for i = 1:n
     dU = (-(sigma_S + sigma_Sm + sigma_Sh)*U+(S + Sh + Sm)*alpha)*Dt;
 
     totGrads = dS + dSm + dSh + dE + dEm + dEh + dI + dIm + dIh + dR + dD + dU;
+
+    % check if the sum of gradients is below a threshold
     if abs(totGrads) > 1
         disp(totGrads);
         keyboard
@@ -438,7 +356,6 @@ for i = 1:n
 
 end
 
-%V = V+ alpha*(S + Sm+ Sh);
 
 x_kp1(1) = S;
 x_kp1(2)=Sm;
@@ -454,38 +371,12 @@ x_kp1(11)=D ;
 x_kp1(12)=U ;
 x_kp1(13)=V ;
 
-% maxvals=[1e7, 1e7/2, 1e7/2, ...
-%     1e7/2, 1e7/4, 1e7/4, ...
-%     1e7/2, 1e7/4, 1e7/4, ...
-%     1e7, 5e4, 1e5, 1e5];
 
-% for jj=1:13
-%     x_kp1(jj,x_kp1(jj,:)<0)=0;
-%     x_kp1(jj,x_kp1(jj,:)>maxvals(jj))=maxvals(jj);
-% end
-
-
-% for jj=14:32
-%     x_kp1(jj,x_kp1(jj,:)<0)=0;
-%     x_kp1(jj,x_kp1(jj,:)>1)=1;
-% end
 
 end
 
 function z = seirObservation(xk)
-%[infectious,death,vax,mask,mobility]
-% x_kp1(1) =S;
-% x_kp1(2)=Sm;
-% x_kp1(3)=Sh;
-% x_kp1(4)=E ;
-% x_kp1(5)=Em;
-% x_kp1(6)=Eh;
-% x_kp1(7)=I ;
-% x_kp1(8)=Im;
-% x_kp1(9)=Ih;
-% x_kp1(10)=R ;
-% x_kp1(11)=D ;
-% x_kp1(12)=U ;
+
 totPop = sum(xk([1:10,12]));
 z(1) = xk(7)+xk(8)+xk(9); %Infectious
 z(2) = xk(11); %death

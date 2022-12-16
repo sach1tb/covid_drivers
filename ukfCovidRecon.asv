@@ -2,7 +2,7 @@ clearvars
 % close all
 addpath(['..', filesep, 'boundedline', filesep, 'boundedline'])
 addpath(['..', filesep, 'boundedline', filesep, 'Inpaint_nans'])
-
+load fminconOptimisedParameters.mat
 
 nc=13; np=11;
 n=nc+np;%number of state
@@ -15,30 +15,30 @@ ddt= dt; % smaller timestep for stable dynamics
 % mask is not accurate
 % mobility is not accurate
 % population is acccurate [census?]
-R=diag([1000,100,1000,0.3,10,1000]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
+R=diag([1000,100,500,0.3,10,1000]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
-%-- fmnincon optimal parameters
-beta0 = 0.5;
-mu0 = 2e-4;
-epsilon0 = 0.8; %1.0 - optimised
-gamma0 = 0.0110;
-eta_Ih0 = 0.1;
-eta_Im0 = 0.1;
-eta_Sh0 = 0.1;
-eta_Sm0 = 0.1;
-kappa_R0 = 0.1;
-kappa_Rm0 = 0.1;
-kappa_Rh0 = 0.1;
+%-- fmnincon optimal parameters (taking the first element of each parameter vector)
+beta0 = modelParams.betaVector(1);
+mu0 = modelParams.muVector(1);
+epsilon0 = modelParams.epsilonVector(1); %1.0 - optimised
+gamma0 = modelParams.gammaVector(1);
+eta_Ih0 = modelParams.eta_Ih(1);
+eta_Im0 = modelParams.eta_Im(1);
+eta_Sh0 = modelParams.eta_Sh(1);
+eta_Sm0 = modelParams.eta_Sm(1);
+kappa_R0 = modelParams.kappa_RVector(1);
+kappa_Rm0 = modelParams.kappa_RmVector(1);
+kappa_Rh0 = modelParams.kappa_RhVector(1);
 kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
-sigma_S0 = 0.0001;
-sigma_Sm0 = 0.0001;
-sigma_Sh0 = 0.0001;
+sigma_S0 = modelParams.sigma_SVector(1);
+sigma_Sm0 = modelParams.sigma_SmVector(1);
+sigma_Sh0 = modelParams.sigma_ShVector(1);
 sigma0=sigma_S0; % because all sigmas are same
 alpha0 = 0.0246;
 
-phi_Sm0 = 0.01;
-phi_S0 = 0.05;
-xi_Sh0 = 0.001;
+phi_Sm0 = modelParams.phi1Vector(1);
+phi_S0 = modelParams.phi2Vector(1);
+xi_Sh0 = modelParams.phi1Vector;
 xi_S0 = 0.001;
 
 % initial estimate
@@ -149,41 +149,10 @@ for k=1:T
     disp(k);
 end
 
-% Run smoother
-% for k = 1:T
-%     pmat(:,:,k)=nearestSPD(pmat(:,:,k));
-% end
-% f=@(x,param) seirDynamics(x,dt);  % nonlinear state equations
-
-%
-% Run the smoother
-% copied from urts_smooth1
-% reassigning variables
-% M = xV;
-% P = pmat;
-% 
-% D = zeros(size(M,1),size(M,1),size(M,2));
-% for k=(size(xV,2)-1):-1:1
-%     if isempty(param)
-%         params = [];
-%     elseif same_p
-%         params = param;
-%     else
-%         params = param{k};
-%     end
-%     [m_pred,P_pred,C] = ...
-%     ut_transform(M(:,k),P(:,:,k),a,params,alpha,beta,kappa);
-%     P_pred = P_pred + Q(:,:,k);
-%     D(:,:,k) = C / P_pred;
-%     M(:,k)   = M(:,k) + D(:,:,k) * (M(:,k+1) - m_pred);
-%     P(:,:,k) = P(:,:,k) + D(:,:,k) * (P(:,:,k+1) - P_pred) * D(:,:,k)';
-% end
-% 
-% 
-% [M,Ps,S] = urts_smooth1(xV,pmat,f,Q,{dt});
 
 
 save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
+
 % remove outliers
 % for jj=1:n
 %     mu=mean(xV(jj,:));
@@ -281,9 +250,9 @@ figure(2); gcf; clf;
 %     "\kappa_R", "\kappa_{Rm}", "\kappa_{Rh}", "\mu", "\gamma", "\epsilon"};
 
 legendStr={"\beta", "\xi_2 (isolation)"  ...
-    , "\xi_1 (mobility)", "\alpha", "\phi_1", ...
-    "\phi_2", "\sigma",  ...
-    "\kappa", "\mu", "\gamma", "\epsilon"};
+    , "\xi_1 (mobility)", "\alpha (Vax)", "\phi_1 (Masking)", ...
+    "\phi_2 (unmasking)", "\sigma (Vax lost)",  ...
+    "\kappa (Imm lost)", "\mu (mortality)", "\gamma (Rec rate)", "\epsilon (E to I)"};
 
 for ii = 1:np
 

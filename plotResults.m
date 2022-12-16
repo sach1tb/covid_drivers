@@ -1,22 +1,22 @@
 function plotResults(params, weights,objective)
 part = 1:1000;
-infectious = readmatrix('infectiousIllinois.csv');
+infectious = readmatrix('data/infectiousIllinois.csv');
 infectious(isnan(infectious))=0;
 infectious = infectious*(9.7/12.8);
 
-death = readmatrix('deathIllinois.csv');
+death = readmatrix('data/deathIllinois.csv');
 death(isnan(death))=0;
 death = cumsum(death);
 death = death*(9.7/12.8);
 
 
 
-vax = readmatrix('vaccinatedIllinois.csv');
+vax = readmatrix('data/vaccinatedIllinois.csv');
 vax(isnan(vax))=0;
 vax = vax*(9.7/12.8);
-mask= readmatrix("maskIllinois.csv");
+mask= readmatrix("data/maskIllinois.csv");
 
-mobility = readmatrix("mobilityIllinois.csv");
+mobility = readmatrix("data/mobilityIllinois.csv");
 mobility(isnan(mobility))=0;
 
 
@@ -72,9 +72,9 @@ phi1Vector = params(18:21);
 phi2Vector = params(22:25);
 gammaVector = params(26:28);
 muVector = params(29:31);
-kappa_RhVector= 0*params(32:33);
-kappa_RVector= 0*params(34:35);
-kappa_RmVector= 0*params(36:37);
+kappa_RhVector= params(32:33);
+kappa_RVector= params(34:35);
+kappa_RmVector= params(36:37);
 alphaVector= params(38:40);
 epsilonVector= params(41:43);
 betaVector= params(44:46);
@@ -85,12 +85,12 @@ eta_Sh = params(49);
 eta_Sm = params(50);
 
 
-t1 = 1000*params(51)
-t2 = 1000*params(52)
-t3 = 1000*params(53)
-t4 = 1000*params(54)
-t5 = 1000*params(55)
-t6 = 1000*params(56)
+t1 = 1000*params(51);
+t2 = 1000*params(52);
+t3 = 1000*params(53);
+t4 = 1000*params(54);
+t5 = 1000*params(55);
+t6 = 1000*params(56);
 
 
 for k=1:numel(part)-1
@@ -102,9 +102,9 @@ for k=1:numel(part)-1
     = seir_simIsolation(x(k,1), x(k,2), x(k,3), x(k,4), x(k,5), x(k,6), ...
         x(k,7), x(k,8), x(k,9),x(k,10), x(k,11), x(k,12), x(k,13), x(k,14), ...
         sigma_ShVector, sigma_SVector, sigma_SmVector, xi1Vector, xi2Vector ...
-        , phi1Vector, phi2Vector ...
-        ,kappa_RhVector, kappa_RVector, kappa_RmVector, ...
-        gammaVector, muVector, alphaVector ...
+        , phi1Vector, phi2Vector, ...
+        gammaVector, muVector,kappa_RhVector, kappa_RVector, kappa_RmVector, ...
+         alphaVector ...
         , epsilonVector, betaVector,eta_Ih,eta_Im,eta_Sh,eta_Sm,t1, t2, t3, t4, t5, t6,k );
 
 end
@@ -134,7 +134,7 @@ plot(S+Sm+Sh)
 hold on
 maskedEstimated = (Sm+Em+Im)./(S+E+I+Sm+Em+Im+Sh+Eh+Ih+R+D+U);
 maskedReference = mask;
-estimatedMobility = -(Sh+Eh+Ih)./(S+Sm+Sh+E+Em+Eh+I+Im+Ih+R);
+estimatedMobility = -(Sh+Eh+Ih)./(S+Sm+Sh+E+Em+Eh+I+Im+Ih+R+D+U);
 
 title('Susceptible')
 
@@ -218,10 +218,6 @@ legend('\kappa_{R}','\kappa_{R_m}','\kappa_{R_h}')
 % 𝑤_𝐷=0.35, 𝑤_𝐼=0.1, 𝑤_𝑈=0.35, 𝑤_𝐻=0.1,𝑤_𝑀=0.1 
 str = sprintf("w_D = %0.3f, w_I = %0.3f,w_U = %0.3f, w_H = %0.3f, w_M = %0.3f", ...
     weights(1),weights(2),weights(3),weights(4),weights(5));
-% str2 =  sprintf("\n \\sigma_{S} = %0.4f, \\sigma_{Sm} = %0.4f, \\sigma_{Sh} = %0.4f, \\alpha= %0.4f," + ...
-%     "\n" + "\\beta = %0.4f, \\mu = %0.4f, \\epsilon = %0.4f, \\gamma = %0.4f, \\eta_{I_h}=%0.4f," + ...
-%     "\\eta_{I_m} = %0.4f,\\eta_{S_h} = %0.4f,\\eta_{S_m} = %0.4f, \\kappa_R= %0.4f, \\kappa_R_m= %0.4f, \\kappa_R_h= %0.4f",sigma_S,sigma_Sm ...
-%     ,sigma_Sh,alpha,beta,mu ,epsilon,gamma,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa_R,kappa_Rm, kappa_Rh);
 
 sgtitle(str);
 
