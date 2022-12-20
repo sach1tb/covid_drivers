@@ -13,28 +13,28 @@ ddt= dt; % smaller timestep for stable dynamics
 R=diag([1000,100,500,0.3,10,1000]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
-beta0 = modelParams.betaVector(1)*0.01;
-mu0 = modelParams.muVector(1)*0.01;
-epsilon0 = modelParams.epsilonVector(1)*0.01; %1.0 - optimised
-gamma0 = modelParams.gammaVector(1)*0.01;
-eta_Ih0 = modelParams.eta_Ih(1)*0.01;
-eta_Im0 = modelParams.eta_Im(1)*0.01;
-eta_Sh0 = modelParams.eta_Sh(1)*0.001;
-eta_Sm0 = modelParams.eta_Sm(1)*0.01;
-kappa_R0 = modelParams.kappa_RVector(1)*0.001;
-kappa_Rm0 = modelParams.kappa_RmVector(1)*0.01;
-kappa_Rh0 = modelParams.kappa_RhVector(1)*0.01;
+beta0 = modelParams.betaVector;
+mu0 = modelParams.muVector;
+epsilon0 = modelParams.epsilonVector; %1.0 - optimised
+gamma0 = modelParams.gammaVector;
+eta_Ih0 = modelParams.eta_Ih;
+eta_Im0 = modelParams.eta_Im;
+eta_Sh0 = modelParams.eta_Sh;
+eta_Sm0 = modelParams.eta_Sm;
+kappa_R0 = modelParams.kappa_RVector;
+kappa_Rm0 = modelParams.kappa_RmVector;
+kappa_Rh0 = modelParams.kappa_RhVector;
 kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
-sigma_S0 = modelParams.sigma_SVector(1)*0.01;
-sigma_Sm0 = modelParams.sigma_SmVector(1)*0.01;
-sigma_Sh0 = modelParams.sigma_ShVector(1)*0.01;
+sigma_S0 = modelParams.sigma_SVector;
+sigma_Sm0 = modelParams.sigma_SmVector;
+sigma_Sh0 = modelParams.sigma_ShVector;
 sigma0=sigma_S0; % because all sigmas are same
-alpha0 = 0.0246;
+alpha0 = modelParams.alphaVector;
 
-phi_Sm0 = modelParams.phi1Vector(1)*0.01;
-phi_S0 = modelParams.phi2Vector(1)*0.01;
-xi_Sh0 = modelParams.xi2Vector(1)*0.01;
-xi_S0 = modelParams.xi1Vector(1)*0.01;
+phi_Sm0 = modelParams.phi1Vector;
+phi_S0 = modelParams.phi2Vector;
+xi_Sh0 = modelParams.xi2Vector;
+xi_S0 = modelParams.xi1Vector;
 
 % initial estimate
 
@@ -127,7 +127,7 @@ save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 
 % Post calculation filters (smoothing and outlier removal)
 for jj = 1:n
-    % xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
+    %xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
     % smooth smoothens dynamocs as well
     xV(jj,:)= smooth(xV(jj,:),14,'lowess');
 end

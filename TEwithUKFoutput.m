@@ -15,7 +15,7 @@ dxk = diff(sigmaPoints,1,3);
 % window size for TE
 windowSizeDays = 12*7;
 % # of samples from the UKF
-nSigmaPoints = 2;
+nSigmaPoints = 10;
 
 CE_Stot_Itot_condE = zeros(nSigmaPoints,datasetLength-windowSizeDays); % (CE_X_Y_Z) conditional TE X->Y conditioned on Z
 CE_Stot_Itot_condEm = zeros(nSigmaPoints,datasetLength-windowSizeDays);
@@ -55,6 +55,9 @@ for i =1:nSigmaPoints
     end
 
 end
+str = sprintf("teData_winSize%d.mat",windowSizeDays);
+save(str,"windowSizeDays",'CE_Stot_Itot_condEh', ...
+    "CE_Stot_Itot_condE","CE_Stot_Itot_condEm","TE_Stot_Itot");
 
 % stdSigmPoints
 stdOfMean = zeros(size(sigmaPoints,1),size(sigmaPoints,3));
