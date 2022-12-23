@@ -13,7 +13,7 @@ ddt= dt; % smaller timestep for stable dynamics
 % covariance of measurement
 %[infectious,death,vax,mask,mobility,Total Population]
 
-R=diag([1000,100,500,0.3,10,1000]); 
+Rp=[0.05,0.01,0.01,0.1,5,0.05]; 
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
 beta0 = modelParams.beta;
@@ -135,6 +135,17 @@ covarianceMatrix = zeros(n,n,T);
 for k=1:T
     zk=z(:,k);                            % save actual state
     zV(:,k)  = zk;                         % save measurment
+
+
+% z(1) = xk(7)+xk(8)+xk(9); %Infectious
+% z(2) = xk(11); %death
+% z(3) = xk(13); % Vax
+% z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
+% z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
+% z(6) = totPop; % population
+
+
+    R = diag([zk(1)*Rp(1), zk(2)*Rp(2), zk(3)*Rp(3),Rp(4), Rp(5), zk(6)*Rp(6)]);
     [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax);            % ekf
     sigmaPointAccumulutor(:,:,k) = Xprev;
     covarianceMatrix(:,:,k) = P;
