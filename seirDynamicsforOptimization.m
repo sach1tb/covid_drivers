@@ -1,15 +1,15 @@
-function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,V,N,phi_1,phi_2,xi_1,xi_2,lambda,lambda_m,lambda_h,alpha,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm ...
-    ,kappa_R,kappa_Rm,kappa_Rh] ...
-    = seirDynamicsforOptimization( ...
-    S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,V,N,sigma_ShVector, sigma_SVector, sigma_SmVector, xi1Vector, xi2Vector, phi1Vector, phi2Vector, ...
-    gammaVector, muVector,kappa_RhVector, kappa_RVector, kappa_RmVector, alphaVector, ...
-    epsilonVector, betaVector,eta_Ih,eta_Im,eta_Sh,eta_Sm)
+function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,V,N,phi_1,phi_2,xi_1,xi_2,lambda,...
+    lambda_m,lambda_h,alpha,beta,eta_Ih,eta_Im,eta_Sh,eta_Sm,kappa0] ...
+    = seirDynamicsforOptimization(S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,V,N,...
+                    sigma0, xi_1, xi_2, phi_1, phi_2, ...
+                    gamma, mu,kappa0, alpha, ...
+                    epsilon, beta,eta_Ih,eta_Im,eta_Sh,eta_Sm)
 
 
 
 %%
 % sigma_Sh, sigma_S, sigma_Sm
-% xi1, xi2, phi1, phi2
+% xi_1, xi_2, phi_1, phi_2
 % gamma, mu
 % kappa_Rh, kappa_R, kappa_Rm
 % alpha, epsilon
@@ -17,24 +17,6 @@ function [S,Sm,Sh,E,Em,Eh,I,Im,Ih,R,D,U,V,N,phi_1,phi_2,xi_1,xi_2,lambda,lambda_
 % eta_Ih, eta_Im, eta_Sh,eta_Sm
 %%
 
-
-
-
-sigma_Sh = sigma_ShVector;
-sigma_S = sigma_SVector;
-sigma_Sm = sigma_SmVector;
-xi_1 = xi1Vector;
-xi_2 = xi2Vector;
-phi_1 = phi1Vector;
-phi_2 = phi2Vector;
-gamma = gammaVector;
-mu = muVector;
-kappa_Rh = kappa_RhVector;
-kappa_R = kappa_RVector;
-kappa_Rm = kappa_RmVector;
-alpha = alphaVector;
-epsilon = epsilonVector;
-beta = betaVector;
 phi_Sm = phi_1;
 phi_Em = phi_1;
 phi_Im = phi_1;
@@ -49,6 +31,17 @@ xi_Ih = xi_1;
 xi_S = xi_2;
 xi_E = xi_2;
 xi_I = xi_2;
+
+
+
+sigma_S = sigma0*S/(S+Sh+Sm);
+sigma_Sm = sigma0*Sm/(S+Sh+Sm);
+sigma_Sh = sigma0*Sh/(S+Sh+Sm);
+
+kappa_R= kappa0*S/(S+Sh+Sm);
+kappa_Rm= kappa0*Sm/(S+Sh+Sm);
+kappa_Rh= kappa0*Sh/(S+Sh+Sm);
+
 
 n = 1000;
 Dt = 1/n;

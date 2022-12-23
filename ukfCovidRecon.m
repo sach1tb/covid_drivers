@@ -10,31 +10,53 @@ m = 6; %number of measurements
 dt = 1;
 ddt= dt; % smaller timestep for stable dynamics
 
-R=diag([1500,100,500,0.3,10,1000]); % covariance of measurement,%[infectious,death,vax,mask,mobility,Total Population]
+% covariance of measurement
+%[infectious,death,vax,mask,mobility,Total Population]
+
+R=diag([1000,100,500,0.3,10,1000]); 
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
-beta0 = modelParams.betaVector;
-mu0 = modelParams.muVector;
-epsilon0 = modelParams.epsilonVector; %1.0 - optimised
-gamma0 = modelParams.gammaVector;
+beta0 = modelParams.beta;
+mu0 = modelParams.mu;
+epsilon0 = modelParams.epsilon; %1.0 - optimised
+gamma0 = modelParams.gamma;
 eta_Ih0 = modelParams.eta_Ih;
 eta_Im0 = modelParams.eta_Im;
 eta_Sh0 = modelParams.eta_Sh;
 eta_Sm0 = modelParams.eta_Sm;
-kappa_R0 = modelParams.kappa_RVector;
-kappa_Rm0 = modelParams.kappa_RmVector;
-kappa_Rh0 = modelParams.kappa_RhVector;
-kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
-sigma_S0 = modelParams.sigma_SVector;
-sigma_Sm0 = modelParams.sigma_SmVector;
-sigma_Sh0 = modelParams.sigma_ShVector;
-sigma0=sigma_S0; % because all sigmas are same
-alpha0 = modelParams.alphaVector;
+kappa0=modelParams.kappa0; 
+sigma0=modelParams.sigma0; 
+alpha0 = modelParams.alpha;
 
-phi_Sm0 = modelParams.phi1Vector;
-phi_S0 = modelParams.phi2Vector;
-xi_Sh0 = modelParams.xi2Vector;
-xi_S0 = modelParams.xi1Vector;
+phi_Sm0 = modelParams.phi1;
+phi_S0 = modelParams.phi2;
+xi_Sh0 = modelParams.xi2;
+xi_S0 = modelParams.xi1;
+
+
+% beta0 = 0.5;
+% mu0 = 2e-4;
+% epsilon0 = 1.0; %1.0 - optimised
+% gamma0 = 0.0110;
+% eta_Ih0 = 0.1;
+% eta_Im0 = 0.1;
+% eta_Sh0 = 0.1;
+% eta_Sm0 = 0.1;
+% kappa_R0 = 0.1;
+% kappa_Rm0 = 0.1;
+% kappa_Rh0 = 0.1;
+% kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
+% sigma_S0 = 0.0001;
+% sigma_Sm0 = 0.0001;
+% sigma_Sh0 = 0.0001;
+% sigma0=sigma_S0; % because all sigmas are same
+% alpha0 = 0.0246;
+% 
+% phi_Sm0 = 0.01;
+% phi_S0 = 0.05;
+% xi_Sh0 = 0.001;
+% xi_S0 = 0.001;
+
 
 % initial estimate
 
@@ -129,7 +151,7 @@ save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 for jj = 1:n
     %xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
     % smooth smoothens dynamocs as well
-    xV(jj,:)= smooth(xV(jj,:),28,'lowess');
+%     xV(jj,:)= smooth(xV(jj,:),28,'lowess');
 end
 
 %% plot results
