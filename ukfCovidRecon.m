@@ -17,14 +17,14 @@ Rp=[0.05,0.01,0.01,0.1,5,0.05];
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
 beta0 = modelParams.beta;
-mu0 = modelParams.mu;
+mu0 = modelParams.mu/100;
 epsilon0 = modelParams.epsilon; %1.0 - optimised
-gamma0 = modelParams.gamma;
+gamma0 = modelParams.gamma/10;
 eta_Ih0 = modelParams.eta_Ih;
 eta_Im0 = modelParams.eta_Im;
 eta_Sh0 = modelParams.eta_Sh;
 eta_Sm0 = modelParams.eta_Sm;
-kappa0=modelParams.kappa0; 
+kappa0=modelParams.kappa0/5; 
 sigma0=modelParams.sigma0; 
 alpha0 = modelParams.alpha;
 
@@ -42,14 +42,8 @@ xi_S0 = modelParams.xi1;
 % eta_Im0 = 0.1;
 % eta_Sh0 = 0.1;
 % eta_Sm0 = 0.1;
-% kappa_R0 = 0.1;
-% kappa_Rm0 = 0.1;
-% kappa_Rh0 = 0.1;
-% kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
-% sigma_S0 = 0.0001;
-% sigma_Sm0 = 0.0001;
-% sigma_Sh0 = 0.0001;
-% sigma0=sigma_S0; % because all sigmas are same
+% kappa0=0.1; % because all kappas are same
+% sigma0=0.0001; % because all sigmas are same
 % alpha0 = 0.0246;
 % 
 % phi_Sm0 = 0.01;

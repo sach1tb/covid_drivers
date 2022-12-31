@@ -2,14 +2,17 @@ clearvars
 
 close all
 clc
-% data obtained from https://www.healthdata.org/node/7425 , click on
-% reference scenario
- data2020 = readtable('reference2020.csv');
- data2021 = readtable('reference2021.csv');
- data2022 = readtable('reference2022.csv');
+% data obtained as follows:
+% > go to https://www.healthdata.org/node/7425, 
+% > click on each reference scenario
+ data2020 = readtable('./data/data_download_file_reference_2020_ILLINOIS.csv');
+ data2021 = readtable('./data/data_download_file_reference_2021_ILLINOIS.csv');
+ data2022 = readtable('./data/data_download_file_reference_2022_ILLINOIS.csv');
 % data2021 = csvread('reference2021.csv');
 % data2022 = csvread('reference2022.csv');
 % 
+
+
 allData = [data2020;data2021;data2022];
 idx = allData.location_id == 536;
 USdata = allData(idx,:);
@@ -31,7 +34,7 @@ popDays = interp1(dayStops,popChicagoMetro,days);
 % writematrix(Vaccinated,'vaccinated.csv');
 % writematrix(Masked,'mask.csv');
 % writematrix(Death,'death.csv');
-%writematrix(Mobility,'mobility.csv');
+% writematrix(Mobility,'mobility.csv');
 % writematrix(Infection,'infectiousIllinois.csv');
 % writematrix(Vaccinated,'vaccinatedIllinois.csv');
 % writematrix(Masked,'maskIllinois.csv');

@@ -50,6 +50,7 @@ xmin = zeros(1,19);
 xmax = 1*ones(1,19);
 xmax(5)=0.1; 
 xmax(1:3) = 0.00; % all sigmas for vaccination
+xmax(7)=0.01;
 xmax(13) = 0.00; % alpha for vaccination
 xmax(14) = 0.5; % epsilon
 xmax(15) = 0.5; % beta
