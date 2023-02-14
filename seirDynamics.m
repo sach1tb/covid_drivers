@@ -15,38 +15,36 @@ D = xk(11);
 U = xk(12);
 V = xk(13);
 
-beta = xk(14);
+[  beta, xi1, xi2, alpha, ...
+            phi1, phi2, sigma0, kappa0, ...
+            mu, gamma, epsilon]=vec2params(xk(14:end));
 
-xi_Sh = xk(15);
-xi_Eh = xk(15);
-xi_Ih = xk(15);
+xi_Sh = xi2;
+xi_Eh = xi2;
+xi_Ih = xi2;
 
-xi_S = xk(16);
-xi_E = xk(16);
-xi_I = xk(16);
+xi_S = xi1;
+xi_E = xi1;
+xi_I = xi1;
 
-alpha = xk(17);
+phi_Sm = phi1;
+phi_Em = phi1;
+phi_Im = phi1;
 
-phi_Sm = xk(18);
-phi_Em = xk(18);
-phi_Im = xk(18);
+phi_S = phi2;
+phi_E = phi2;
+phi_I = phi2;
 
-phi_S = xk(19);
-phi_E = xk(19);
-phi_I = xk(19);
-% sigma is a single value and is scaled with the proportion of the
-% susceptible population
-sigma_S = xk(20)*S/(S+Sh+Sm);
-sigma_Sm = xk(20)*Sm/(S+Sh+Sm);
-sigma_Sh = xk(20)*Sh/(S+Sh+Sm);
 
-kappa_R= xk(21)*S/(S+Sh+Sm);
-kappa_Rm= xk(21)*Sm/(S+Sh+Sm);
-kappa_Rh= xk(21)*Sh/(S+Sh+Sm);
+sigma_S = sigma0*S/(S+Sh+Sm);
+sigma_Sm = sigma0*Sm/(S+Sh+Sm);
+sigma_Sh = sigma0*Sh/(S+Sh+Sm);
 
-mu = xk(22);
-gamma = xk(23);
-epsilon = xk(24);
+kappa_R= kappa0*S/(S+Sh+Sm);
+kappa_Rm= kappa0*Sm/(S+Sh+Sm);
+kappa_Rh= kappa0*Sh/(S+Sh+Sm);
+
+
 n = 1000;
 Dt = dt/n;
 

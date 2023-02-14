@@ -2,7 +2,7 @@ clearvars
 
 addpath('..\..\..\..\boundedline\boundedline')
 addpath('..\..\..\..\Inpaint_nans')
-addpath('cteUpdatedFiles\')
+addpath(['cteUpdatedFiles', filesep])
 
 load ukfOutput.mat  %size is 24, 24*2+1
 sigmaPoints = sigmaPointAccumulutor;
