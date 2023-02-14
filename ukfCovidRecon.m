@@ -34,28 +34,28 @@ Rp=[0.05,0.01,0.01,0.1,5,0.05];
 % xi_S0 = modelParams.xi1;
 
 
-beta0 = 0.5;
-mu0 = 2e-4;
-epsilon0 = 1.0; %1.0 - optimised
-gamma0 = 0.0110;
-eta_Ih0 = 0.1;
-eta_Im0 = 0.1;
-eta_Sh0 = 0.1;
-eta_Sm0 = 0.1;
-kappa_R0 = 0.1;
-kappa_Rm0 = 0.1;
-kappa_Rh0 = 0.1;
-kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
-sigma_S0 = 0.0001;
-sigma_Sm0 = 0.0001;
-sigma_Sh0 = 0.0001;
-sigma0=sigma_S0; % because all sigmas are same
-alpha0 = 0.0246;
+beta0 = 0.5;  %transmissibility
+mu0 = 2e-4; %Mortality
+epsilon0 = 1.0; %1.0 - optimised, rate of progression to infectious class
+gamma0 = 0.0110; % Rate of recovery
+eta_Ih0 = 0.1; % used in lambda calculation
+eta_Im0 = 0.1; % used in lambda calculation
+eta_Sh0 = 0.1;  % used in lambda calculation
+eta_Sm0 = 0.1;  % used in lambda calculation
+kappa_R0 = 0.1; % Recovery rate to Susceptible
+kappa_Rm0 = 0.1; % Recovery rate to masked
+kappa_Rh0 = 0.1; % Recovery rate to isolated
+kappa0 = kappa_R0; % because all kappas are same but may depend on compartment sizes
+sigma_S0 = 0.0001; % vaccination to S
+sigma_Sm0 = 0.0001; % vaccination to S_m
+sigma_Sh0 = 0.0001; % vaccination to S_h
+sigma0 = sigma_S0; % because all sigmas are same
+alpha0 = 0.0246;  % Vaccination rate
 
-phi_Sm0 = 0.01;
-phi_S0 = 0.01;
-xi_Sh0 = 0.001;
-xi_S0 = 0.001;
+phi_Sm0 = 0.01; % S -> S_m
+phi_S0 = 0.01;  % S_m -> S
+xi_Sh0 = 0.001; % S -> S_h
+xi_S0 = 0.001;  % S_h -> S
 
 
 % initial estimate
