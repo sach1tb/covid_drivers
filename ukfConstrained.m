@@ -53,7 +53,7 @@ end
 %
 L=numel(x);                                 %number of states
 m=numel(z);                                 %number of measurements
-alpha=1e-3;                                 %default, tunable
+alpha=1;                                 %default, tunable
 ki=0;                                       %default, tunable
 beta=2;                                     %default, tunable
 lambda=alpha^2*(L+ki)-L;                    %scaling factor
