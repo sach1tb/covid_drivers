@@ -16,46 +16,46 @@ ddt= dt; % smaller timestep for stable dynamics
 Rp=[0.05,0.01,0.01,0.1,5,0.05]; 
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
-beta0 = modelParams.beta;
-mu0 = modelParams.mu;
-epsilon0 = modelParams.epsilon; %1.0 - optimised
-gamma0 = modelParams.gamma;
-eta_Ih0 = modelParams.eta_Ih;
-eta_Im0 = modelParams.eta_Im;
-eta_Sh0 = modelParams.eta_Sh;
-eta_Sm0 = modelParams.eta_Sm;
-kappa0=modelParams.kappa0; 
-sigma0=modelParams.sigma0; 
-alpha0 = modelParams.alpha;
-
-phi_Sm0 = modelParams.phi1;
-phi_S0 = modelParams.phi2;
-xi_Sh0 = modelParams.xi2;
-xi_S0 = modelParams.xi1;
-
-
-% beta0 = 0.5;
-% mu0 = 2e-4;
-% epsilon0 = 1.0; %1.0 - optimised
-% gamma0 = 0.0110;
-% eta_Ih0 = 0.1;
-% eta_Im0 = 0.1;
-% eta_Sh0 = 0.1;
-% eta_Sm0 = 0.1;
-% kappa_R0 = 0.1;
-% kappa_Rm0 = 0.1;
-% kappa_Rh0 = 0.1;
-% kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
-% sigma_S0 = 0.0001;
-% sigma_Sm0 = 0.0001;
-% sigma_Sh0 = 0.0001;
-% sigma0=sigma_S0; % because all sigmas are same
-% alpha0 = 0.0246;
+% beta0 = modelParams.beta;
+% mu0 = modelParams.mu;
+% epsilon0 = modelParams.epsilon; %1.0 - optimised
+% gamma0 = modelParams.gamma;
+% eta_Ih0 = modelParams.eta_Ih;
+% eta_Im0 = modelParams.eta_Im;
+% eta_Sh0 = modelParams.eta_Sh;
+% eta_Sm0 = modelParams.eta_Sm;
+% kappa0=modelParams.kappa0; 
+% sigma0=modelParams.sigma0; 
+% alpha0 = modelParams.alpha;
 % 
-% phi_Sm0 = 0.01;
-% phi_S0 = 0.05;
-% xi_Sh0 = 0.001;
-% xi_S0 = 0.001;
+% phi_Sm0 = modelParams.phi1;
+% phi_S0 = modelParams.phi2;
+% xi_Sh0 = modelParams.xi2;
+% xi_S0 = modelParams.xi1;
+
+
+beta0 = 0.5;
+mu0 = 2e-4;
+epsilon0 = 1.0; %1.0 - optimised
+gamma0 = 0.0110;
+eta_Ih0 = 0.1;
+eta_Im0 = 0.1;
+eta_Sh0 = 0.1;
+eta_Sm0 = 0.1;
+kappa_R0 = 0.1;
+kappa_Rm0 = 0.1;
+kappa_Rh0 = 0.1;
+kappa0=kappa_R0; % because all kappas are same but may depend on compartment sizes
+sigma_S0 = 0.0001;
+sigma_Sm0 = 0.0001;
+sigma_Sh0 = 0.0001;
+sigma0=sigma_S0; % because all sigmas are same
+alpha0 = 0.0246;
+
+phi_Sm0 = 0.01;
+phi_S0 = 0.01;
+xi_Sh0 = 0.001;
+xi_S0 = 0.001;
 
 
 % initial estimate
@@ -69,7 +69,7 @@ parameterInit = [beta0,xi_Sh0,xi_S0 ...
 sigmaLimitsMax = [1e7*ones(1,nc), ones(1,np)];
 sigmaLimitsMin = [0*ones(1,nc), 0*ones(1,np)];
 
-Q=diag([1e-6*ones(1,nc), 0.1*parameterInit]); % covariance of process
+Q=diag([1e-6*ones(1,nc), 0.1*parameterInit] + eps); % covariance of process
 f=@(x) seirDynamics(x,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,dt);  % nonlinear state equations
 h=@(x) seirObservation(x);                               % measurement equation
 s=[zeros(1,nc),parameterInit]';  %
