@@ -13,7 +13,7 @@ ddt= dt; % smaller timestep for stable dynamics
 % covariance of measurement
 %[infectious,death,vax,mask,mobility,Total Population]
 % multipliers: infectious is std, 
-Rp=[0.005,0.01^2,0.01^2,0.1^2,2^2,0.01^2]; 
+Rp=[0.00,0.01^2,0.01^2,0.1^2,2^2,0.01^2]; 
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
 % beta0 = modelParams.beta;
