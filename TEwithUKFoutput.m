@@ -1,7 +1,7 @@
 clearvars
 
-addpath('..\..\..\..\boundedline\boundedline')
-addpath('..\..\..\..\Inpaint_nans')
+addpath(['boundedline', filesep, 'boundedline'])
+addpath(['boundedline', filesep, 'Inpaint_nans'])
 addpath(['cteUpdatedFiles', filesep])
 
 load ukfOutput.mat  %size is 24, 24*2+1

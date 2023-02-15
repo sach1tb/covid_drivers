@@ -1,7 +1,7 @@
 clearvars
 % close all
-addpath(['..', filesep, 'boundedline', filesep, 'boundedline'])
-addpath(['..', filesep, 'boundedline', filesep, 'Inpaint_nans'])
+addpath(['boundedline', filesep, 'boundedline'])
+addpath(['boundedline', filesep, 'Inpaint_nans'])
 load fminconOptimisedParameters.mat
 
 nc=13; np=11;
@@ -12,8 +12,8 @@ ddt= dt; % smaller timestep for stable dynamics
 
 % covariance of measurement
 %[infectious,death,vax,mask,mobility,Total Population]
-
-Rp=[0.005,0.01,0.01,0.1,5,0.05]; 
+% multipliers: infectious is std, 
+Rp=[0.005,0.01^2,0.01^2,0.1^2,2^2,0.01^2]; 
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
 % beta0 = modelParams.beta;
@@ -151,7 +151,10 @@ for k=1:T
     covarianceMatrix(:,:,k) = P;
     pmat(:,:,k) = P;
     xV(:,k) = x;                            % save estimate
-    disp(k);
+    fprintf('.');
+    if ~mod(k,28)
+        fprintf('%d\n', k);
+    end
 end
 
 
@@ -235,10 +238,10 @@ title('Total population')
 figure(2); gcf; clf;
 
 
-legendStr={"\beta", "\xi_2 (isolation)"  ...
-    , "\xi_1 (mobility)", "\alpha (Vax)", "\phi_1 (Masking)", ...
-    "\phi_2 (unmasking)", "\sigma (Vax lost)",  ...
-    "\kappa (Imm lost)", "\mu (mortality)", "\gamma (Rec rate)", "\epsilon (E to I)"};
+legendStr={"\beta", "\xi_1 (mobility)"  ...
+    , "\xi_2 (isolation)", "\alpha (vaccination)", "\phi_1 (masking)", ...
+    "\phi_2 (unmasking)", "\sigma (loss of imm-vax)",  ...
+    "\kappa (loss of imm-sick)", "\mu (mortality)", "\gamma (recovery)", "\epsilon (incubation)"};
 
 for ii = 1:np
 
