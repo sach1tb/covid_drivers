@@ -13,27 +13,49 @@ fall = [280, 376;
 plotTE1(rise,fall);
 
 %% 
+figure(1); gcf;
+
+set(gca, 'xlim', [fall(1,1), fall(1,2)]);
+print('-dpng', 'manuscript\plots\h-fall1.png')
+
+set(gca, 'xlim', [fall(2,1), fall(2,2)]);
+print('-dpng', 'manuscript\plots\h-fall2.png')
+
+set(gca, 'xlim', [fall(3,1), fall(3,2)]);
+print('-dpng', 'manuscript\plots\h-fall3.png')
+
+
+figure(2); gcf;
+set(gca, 'xlim', [rise(1,1), rise(1,2)]);
+print('-dpng', 'manuscript\plots\h-rise1.png')
+
+set(gca, 'xlim', [rise(2,1), rise(2,2)]);
+print('-dpng', 'manuscript\plots\h-rise2.png')
+
+set(gca, 'xlim', [rise(3,1), rise(3,2)]);
+print('-dpng', 'manuscript\plots\h-rise3.png')
+
+
+
 figure(3); gcf;
 
 set(gca, 'xlim', [rise(1,1), rise(1,2)]);
-print('-dpng', 'manuscript\plots\rise1.png')
-
-
+print('-dpng', 'manuscript\plots\a-rise1.png')
 
 set(gca, 'xlim', [rise(2,1), rise(2,2)]);
-print('-dpng', 'manuscript\plots\rise2.png')
+print('-dpng', 'manuscript\plots\a-rise2.png')
 
 set(gca, 'xlim', [rise(3,1), rise(3,2)]);
-print('-dpng', 'manuscript\plots\rise3.png')
+print('-dpng', 'manuscript\plots\a-rise3.png')
 
 set(gca, 'xlim', [fall(1,1), fall(1,2)]);
-print('-dpng', 'manuscript\plots\fall1.png')
+print('-dpng', 'manuscript\plots\a-fall1.png')
 
 set(gca, 'xlim', [fall(2,1), fall(2,2)]);
-print('-dpng', 'manuscript\plots\fall2.png')
+print('-dpng', 'manuscript\plots\a-fall2.png')
 
 set(gca, 'xlim', [fall(3,1), fall(3,2)]);
-print('-dpng', 'manuscript\plots\fall3.png')
+print('-dpng', 'manuscript\plots\a-fall3.png')
 
 
 
@@ -47,7 +69,10 @@ end
 
 function plotTE1(rise,fall)
 load('allTECal_win84.mat');
-
+infectious = csvread('data/infectiousIllinois_ci.csv');
+infectious=infectious(1:1002,2);
+infectious(isnan(infectious))=0;
+infectious = infectious*(9.7/12.8);
 addpath(['boundedline', filesep, 'boundedline'])
 addpath(['boundedline', filesep, 'Inpaint_nans'])
 windowSizeDays = 12*7;
@@ -56,6 +81,17 @@ windowSizeDays = 12*7;
 
 figure(1)
 clf;
+NetTE_phi1_Itot(isnan(NetTE_phi1_Itot))=0;
+NetTE_xi2_Itot(isnan(NetTE_xi2_Itot))=0;
+NetTE_alpha_Itot(isnan(NetTE_alpha_Itot))=0;
+
+NetTE_phi2_Itot(isnan(NetTE_phi2_Itot))=0;
+NetTE_xi1_Itot(isnan(NetTE_xi1_Itot))=0;
+NetTE_sigma_Itot(isnan(NetTE_sigma_Itot))=0;
+
+
+
+
 meanNetTE_phi1_Itot = mean(NetTE_phi1_Itot);
 stdNetTE_phi1_Itot = std(NetTE_phi1_Itot);
 h1 = plot(windowSizeDays/2+(1:numel(meanNetTE_phi1_Itot)),meanNetTE_phi1_Itot,'-r');
@@ -75,10 +111,10 @@ stdNetTE_alpha_Itot = std(NetTE_alpha_Itot);
 h4 = plot(windowSizeDays/2+(1:numel(meanNetTE_alpha_Itot)),meanNetTE_alpha_Itot,'-b');
 hold on
 boundedline(windowSizeDays/2+(1:numel(meanNetTE_alpha_Itot)),meanNetTE_alpha_Itot,stdNetTE_alpha_Itot, '-b','alpha','linewidth',1.2);
-for i = 1:size(fall,1)
-    temp = rectangle('Position',[fall(i,1),-0.6,fall(i,2)-fall(i,1),1+0.6],'FaceColor',[1.0 0.3 0.3 0.3]);
-    temp.EdgeColor = 'none';
-end
+% for i = 1:size(fall,1)
+%     temp = rectangle('Position',[fall(i,1),-0.6,fall(i,2)-fall(i,1),1+0.6],'FaceColor',[1.0 0.3 0.3 0.3]);
+%     temp.EdgeColor = 'none';
+% end
 
 legend([h1,h2, h4, h3],'${\phi_1 \rightarrow \dot{I}}$','${\xi_{2} \rightarrow \dot{I}}$' ...
     ,'${\alpha \rightarrow \dot{I}}$','$\hat{I}$','interpreter','latex', 'location', 'northeastoutside');
@@ -109,10 +145,10 @@ h8 = plot(windowSizeDays/2+(1:numel(meanNetTE_sigma_Itot)),meanNetTE_sigma_Itot,
 hold on
 boundedline(windowSizeDays/2+(1:numel(meanNetTE_sigma_Itot)),meanNetTE_sigma_Itot,stdNetTE_sigma_Itot, '-b','alpha','linewidth',1.2);
 
-for i = 1:size(rise,1)
-    temp = rectangle('Position',[rise(i,1),-0.6,rise(i,2)-rise(i,1),1+0.6],'FaceColor',[0.3 0.3 1.0 0.3]);
-    temp.EdgeColor = 'none';
-end
+% for i = 1:size(rise,1)
+%     temp = rectangle('Position',[rise(i,1),-0.6,rise(i,2)-rise(i,1),1+0.6],'FaceColor',[0.3 0.3 1.0 0.3]);
+%     temp.EdgeColor = 'none';
+% end
 
 
 legend([h5,h6,h8,h7],'${\phi_{2} \rightarrow \dot{I}}$','${\xi_{1} \rightarrow \dot{I}}$', ...

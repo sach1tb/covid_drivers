@@ -12,12 +12,12 @@ ddt= dt; % smaller timestep for stable dynamics
 
 % covariance of measurement
 %[infectious,death,vax,mask,mobility,Total Population]
-% multipliers: infectious is std, 
+% multipliers: infectious is std,
 % for population Census.gov says 90% confidence level
-% For a 90% confidence level, the critical factor or z-value is 1.645 
+% For a 90% confidence level, the critical factor or z-value is 1.645
 % MOE = Z*std/sqrt(n)
 % https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/2019_ACS_Accuracy_Document_Worked_Examples.pdf
-Rp=[0.00,0.1^2,0.01^2,0.1^2,2^2,(0.001/1.645)^2]; 
+Rp=[0.00,0.1^2,0.01^2,0.1^2,2^2,(0.001/1.645)^2];
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
 % beta0 = modelParams.beta;
@@ -28,10 +28,10 @@ Rp=[0.00,0.1^2,0.01^2,0.1^2,2^2,(0.001/1.645)^2];
 % eta_Im0 = modelParams.eta_Im;
 % eta_Sh0 = modelParams.eta_Sh;
 % eta_Sm0 = modelParams.eta_Sm;
-% kappa0=modelParams.kappa0; 
-% sigma0=modelParams.sigma0; 
+% kappa0=modelParams.kappa0;
+% sigma0=modelParams.sigma0;
 % alpha0 = modelParams.alpha;
-% 
+%
 % phi10 = modelParams.phi1;
 % phi20 = modelParams.phi2;
 % xi20 = modelParams.xi2;
@@ -75,9 +75,9 @@ s(1) = 12830632*9.7/12.8-24; %9.7e6-24; % initial state susceptible
 s(7) = 24; % initial infections
 x=s; %initial state          % initial state with noise
 P = Q;                        % initial state covraiance
-                                    % total dynamic steps
+% total dynamic steps
 
- 
+
 % data/observations
 
 % infectious = csvread('data/infectiousIllinois.csv');
@@ -116,9 +116,9 @@ mobility(isnan(mobility))=0;
 mobility = interp1(1:dt:T, mobility, 1:ddt:T);
 
 
-dayStops = [1 332 697 1002]; 
+dayStops = [1 332 697 1002];
 % data source https://www.statista.com/statistics/815172/chicago-metro-area-population/
-% popChicagoMetro = [9684738 9601605 9509934 9433330]; 
+% popChicagoMetro = [9684738 9601605 9509934 9433330];
 
 % census.gov
 popChicagoMetro = [12830632, 12812508, 12671469, 12582032]*9.7/12.8;
@@ -145,12 +145,12 @@ for k=1:T
     zV(:,k)  = zk;                         % save measurment
 
 
-% z(1) = xk(7)+xk(8)+xk(9); %Infectious
-% z(2) = xk(11); %death
-% z(3) = xk(13); % Vax
-% z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
-% z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
-% z(6) = totPop; % population
+    % z(1) = xk(7)+xk(8)+xk(9); %Infectious
+    % z(2) = xk(11); %death
+    % z(3) = xk(13); % Vax
+    % z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
+    % z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
+    % z(6) = totPop; % population
 
 
     R = diag([infectious_std(k)^2, zk(2)*Rp(2), zk(3)*Rp(3),Rp(4), Rp(5), zk(6)*Rp(6)]);
@@ -169,92 +169,135 @@ end
 smooth_yes=1;
 if smooth_yes
     for jj = 1:n
-        %xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
+        %xV(jj,:) = filloutliers(xV(jj,:),'nearest',2);
         % smooth smoothens dynamocs as well
-    %     xV(jj,:)= smooth(xV(jj,:),28,'lowess');
+        %     xV(jj,:)= smooth(xV(jj,:),28,'lowess');
         xV(jj,:)= sma(xV(jj,:),7);
     end
 end
 
 save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 
-
+startDate = datenum('02-04-2020');
+endDate = datenum('11-01-2022');
+dateData = linspace(startDate,endDate,1002);
+numberOfXTicks = 5;
 %% plot results
 figure(1); gcf; clf;
 
 subplot(3,3,1)
 
 
-plot(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)),'r--','LineWidth',2)
-xlabel("Day");
+%plot(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)),'r--','LineWidth',2)
+plot(dateData,(xV(1,:)+xV(2,:)+xV(3,:)),'r--','LineWidth',2)
+grid on;
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Susceptible')
 
 subplot(3,3,2)
 
-plot((xV(4,:)+xV(5,:)+xV(6,:)),'r--','LineWidth',2)
-xlabel("Day");
+plot(dateData,(xV(4,:)+xV(5,:)+xV(6,:)),'r--','LineWidth',2)
+grid on;
+datenum(dateData);
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Exposed')
 
 subplot(3,3,3)
-plot(infectious,'k-','LineWidth',2);
+plot(dateData,infectious,'k-','LineWidth',2);
 hold on
-plot(xV(7,:)+xV(8,:)+xV(9,:),'r--','LineWidth',2)
-xlabel("Day");
+plot(dateData,xV(7,:)+xV(8,:)+xV(9,:),'r--','LineWidth',2)
+%set(gca,'Xtick',linspace(startDate,endDate,numberOfXTicks))
+ax = gca;
+ax.XMinorTick = 'on';
+ax.XTick = datenum(dateData);
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Infectious')
 
 
 subplot(3,3,4)
-plot(xV(10,:),'r--','LineWidth',2)
-xlabel("Day");
+plot(dateData,xV(10,:),'r--','LineWidth',2)
+%set(gca,'Xtick',linspace(startDate,endDate,numberOfXTicks))
+ax = gca;
+ax.XMinorTick = 'on';
+ax.XTick = datenum(dateData);
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Recovered')
 
 subplot(3,3,5)
 
-plot(death,'k-','LineWidth',2);
+plot(dateData,death,'k-','LineWidth',2);
 
 hold on
-plot(xV(11,:),'r--','LineWidth',2)
-xlabel("Day");
+plot(dateData,xV(11,:),'r--','LineWidth',2)
+%set(gca,'Xtick',linspace(startDate,endDate,numberOfXTicks))
+ax = gca;
+ax.XMinorTick = 'on';
+ax.XTick = datenum(dateData);
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Deaths (Cumulative)')
 
 
 subplot(3,3,6)
-plot(vax,'k-','LineWidth',2);
+plot(dateData,vax,'k-','LineWidth',2);
 hold on
-plot(xV(13,:),'r--','LineWidth',2)
-xlabel("Day");
+plot(dateData,xV(13,:),'r--','LineWidth',2)
+%set(gca,'Xtick',linspace(startDate,endDate,numberOfXTicks))
+ax = gca;
+ax.XMinorTick = 'on';
+ax.XTick = datenum(dateData);
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Vaccinated (Cumulative)')
 
 
 subplot(3,3,7)
-plot(mask,'k-','LineWidth',2);
+plot(dateData,mask,'k-','LineWidth',2);
 hold on
 
-plot((xV(2,:)+xV(5,:)+xV(8,:))./sum(xV([1:10,12],:),1) ,'r--','LineWidth',2)
-xlabel("Day");
+plot(dateData,(xV(2,:)+xV(5,:)+xV(8,:))./sum(xV([1:10,12],:),1) ,'r--','LineWidth',2)
+%set(gca,'Xtick',linspace(startDate,endDate,numberOfXTicks))
+ax = gca;
+ax.XMinorTick = 'on';
+ax.XTick = datenum(dateData);
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Masked')
 
 subplot(3,3,8)
-plot(mobility,'k-','LineWidth',2);
+plot(dateData,mobility,'k-','LineWidth',2);
 hold on
 
-plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV([1:10,12],:),1),'r--','LineWidth',2)
-xlabel("Day");
+plot(dateData,-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV([1:10,12],:),1),'r--','LineWidth',2)
+%set(gca,'Xtick',linspace(startDate,endDate,numberOfXTicks))
+ax = gca;
+ax.XMinorTick = 'on';
+ax.XTick = datenum(dateData);
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Mobility')
 
 subplot(3,3,9)
-plot(popDays,'k-','LineWidth',2);
+plot(dateData,popDays,'k-','LineWidth',2);
 hold on;
-plot(sum(xV([1:10, 12],:),1),'r--','LineWidth',2)
-xlabel("Day");
+plot(dateData,sum(xV([1:10, 12],:),1),'r--','LineWidth',2)
+ax = gca;
+ax.XMinorTick = 'on';
+ax.XTick = datenum(dateData);
+datetick('x','mmm, yy')
+%xlabel("Day");
 ylabel("Population")
 title('Total population')
 
@@ -270,13 +313,15 @@ legendStr={"\beta", "\xi_1 (mobility)"  ...
 
 for ii = 1:np
 
-subplot(3,4,ii);
+    subplot(3,4,ii);
 
-plot(xV(ii+nc,:),'k-','LineWidth',2) ;
-hold on
-xlabel("Day");
-ylabel("Value")
-title(legendStr{ii});
+    plot(dateData, xV(ii+nc,:),'k-','LineWidth',2) ;
+    hold on
+    grid on;
+    datetick('x','mmm, yy')
+%     xlabel("Day");
+    ylabel("Value")
+    title(legendStr{ii});
 end
 
 
@@ -285,30 +330,37 @@ figure(3); gcf; clf;
 
 subplot(1,3,1)
 
-plot(1:size(xV,2),xV(1,:));
+plot(dateData,xV(1,:),'LineWidth',2);
 hold on
-plot(1:size(xV,2),xV(2,:));
-plot(1:size(xV,2),xV(3,:));
+plot(dateData,xV(2,:),'LineWidth',2);
+plot(dateData,xV(3,:),'LineWidth',2);
+grid on;
+datetick('x','mmm, yy')
 title('Susceptible')
 legend("S","S_m","S_h");
 
 
 subplot(1,3,2)
 
-plot(1:size(xV,2),xV(4,:));
+plot(dateData,xV(4,:),'LineWidth',2);
 hold on
-plot(1:size(xV,2),xV(5,:));
-plot(1:size(xV,2),xV(6,:));
+plot(dateData,xV(5,:),'LineWidth',2);
+plot(dateData,xV(6,:),'LineWidth',2);
+grid on;
+datetick('x','mmm, yy')
 title('Exposed')
 legend("E","E_m","E_h");
 
 
 subplot(1,3,3)
 
-plot(1:size(xV,2),xV(7,:));
+plot(dateData,xV(7,:),'LineWidth',2);
 hold on
-plot(1:size(xV,2),xV(8,:));
-plot(1:size(xV,2),xV(9,:));
+plot(dateData,xV(8,:),'LineWidth',2);
+plot(dateData,xV(9,:),'LineWidth',2);
+grid on;
+datetick('x','mmm, yy')
+%xlabel("Day");
 title('Infectious')
 legend("I","I_m","I_h");
 %%

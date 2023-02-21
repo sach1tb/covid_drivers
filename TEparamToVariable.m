@@ -12,7 +12,7 @@ meanValues = squeeze(sigmaPoints(:,1,:));
 dxk = diff(sigmaPoints,1,3);
 
 
-% window size for TE
+% windowSizeDays size for TE
 windowSizeDays = 16*7;
 % # of samples from the UKF
 nSigmaPoints = 24;
@@ -91,33 +91,63 @@ for i =1:nSigmaPoints
     for k = 1:1:datasetLength-windowSizeDays
 
         %TE_Stot_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+        
+        Hy = ent(Itot(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
+
+        Hx = ent(phi1(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
+
         TE_phi1_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),phi1(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_phi1_Itot(i,k) = TE_phi1_Itot(i,k)/sqrt(Hx*Hy);
         TE_Itot_phi1(i,k) = ete_hist(phi1(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_Itot_phi1(i,k) = TE_phi1_Itot(i,k)/sqrt(Hx*Hy);
         NetTE_phi1_Itot(i,k) =  TE_phi1_Itot(i,k) - TE_Itot_phi1(i,k);
 
+
+        Hx = ent(xi2(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_xi2_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),xi2(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_xi2_Itot(i,k) = TE_xi2_Itot(i,k)/sqrt(Hx*Hy);
         TE_Itot_xi2(i,k) = ete_hist(xi2(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_Itot_xi2(i,k) = TE_Itot_xi2(i,k)/sqrt(Hx*Hy);
         NetTE_xi2_Itot(i,k) = TE_xi2_Itot(i,k)-TE_Itot_xi2(i,k) ;
 
-
+        
+        Hx = ent(phi2(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_phi2_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),phi2(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_phi2_Itot(i,k) = TE_phi2_Itot(i,k)/sqrt(Hx*Hy);
         TE_Itot_phi2(i,k) = ete_hist(phi2(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_Itot_phi2(i,k) = TE_Itot_phi2(i,k)/sqrt(Hx*Hy);
         NetTE_phi2_Itot(i,k) = TE_phi2_Itot(i,k) - TE_Itot_phi2(i,k);
 
+        
+        Hx = ent(xi1(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_xi1_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),xi1(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_xi1_Itot(i,k) = TE_xi1_Itot(i,k)/sqrt(Hx*Hy);
         TE_Itot_xi1(i,k) = ete_hist(xi1(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_Itot_xi1(i,k) = TE_Itot_xi1(i,k)/sqrt(Hx*Hy);
         NetTE_xi1_Itot(i,k) = TE_xi1_Itot(i,k) - TE_Itot_xi1(i,k);
 
+        
+        Hx = ent(sigma(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_sigma_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),sigma(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_sigma_Itot(i,k) = TE_sigma_Itot(i,k)/sqrt(Hx*Hy);
         TE_Itot_sigma(i,k) = ete_hist(sigma(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_Itot_sigma(i,k) = TE_Itot_sigma(i,k)/sqrt(Hx*Hy);
         NetTE_sigma_Itot(i,k) = TE_sigma_Itot(i,k) - TE_Itot_sigma(i,k);
 
+
+        Hx = ent(alpha(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_alpha_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),alpha(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_alpha_Itot(i,k) = TE_alpha_Itot(i,k)/sqrt(Hx*Hy);
         TE_Itot_alpha(i,k) = ete_hist(alpha(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_Itot_alpha(i,k) = TE_Itot_alpha(i,k)/sqrt(Hx*Hy);
         NetTE_alpha_Itot(i,k) = TE_alpha_Itot(i,k) - TE_Itot_alpha(i,k);
 
+        
+        Hx = ent(kappa(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_kappa_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),kappa(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+             TE_kappa_Itot(i,k) = TE_kappa_Itot(i,k)/sqrt(Hx*Hy);
         TE_Itot_kappa(i,k) = ete_hist(kappa(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
+            TE_Itot_kappa(i,k) = TE_Itot_kappa(i,k)/sqrt(Hx*Hy);
         NetTE_kappa_Itot(i,k) = TE_kappa_Itot(i,k) - TE_Itot_kappa(i,k);
 
 
