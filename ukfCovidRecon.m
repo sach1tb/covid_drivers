@@ -175,42 +175,50 @@ subplot(3,3,1)
 
 
 plot(1:size(xV,2),(xV(1,:)+xV(2,:)+xV(3,:)),'r--','LineWidth',2)
-
+xlabel("Day");
+ylabel("Population")
 title('Susceptible')
 
 subplot(3,3,2)
 
 plot((xV(4,:)+xV(5,:)+xV(6,:)),'r--','LineWidth',2)
+xlabel("Day");
+ylabel("Population")
 title('Exposed')
 
 subplot(3,3,3)
 plot(infectious,'k-','LineWidth',2);
 hold on
 plot(xV(7,:)+xV(8,:)+xV(9,:),'r--','LineWidth',2)
-
+xlabel("Day");
+ylabel("Population")
 title('Infectious')
 
 
 subplot(3,3,4)
 plot(xV(10,:),'r--','LineWidth',2)
+xlabel("Day");
+ylabel("Population")
 title('Recovered')
 
 subplot(3,3,5)
 
-plot(death,'-');
+plot(death,'k-','LineWidth',2);
 
 hold on
 plot(xV(11,:),'r--','LineWidth',2)
-
-title('Deaths')
+xlabel("Day");
+ylabel("Population")
+title('Deaths (Cumulative)')
 
 
 subplot(3,3,6)
 plot(vax,'k-','LineWidth',2);
 hold on
 plot(xV(13,:),'r--','LineWidth',2)
-
-title('Vaccinated')
+xlabel("Day");
+ylabel("Population")
+title('Vaccinated (Cumulative)')
 
 
 subplot(3,3,7)
@@ -218,6 +226,8 @@ plot(mask,'k-','LineWidth',2);
 hold on
 
 plot((xV(2,:)+xV(5,:)+xV(8,:))./sum(xV([1:10,12],:),1) ,'r--','LineWidth',2)
+xlabel("Day");
+ylabel("Population")
 title('Masked')
 
 subplot(3,3,8)
@@ -225,12 +235,16 @@ plot(mobility,'k-','LineWidth',2);
 hold on
 
 plot(-100*(xV(3,:)+xV(6,:)+xV(9,:))./sum(xV([1:10,12],:),1),'r--','LineWidth',2)
+xlabel("Day");
+ylabel("Population")
 title('Mobility')
 
 subplot(3,3,9)
 plot(popDays,'k-','LineWidth',2);
 hold on;
 plot(sum(xV([1:10, 12],:),1),'r--','LineWidth',2)
+xlabel("Day");
+ylabel("Population")
 title('Total population')
 
 
@@ -247,9 +261,10 @@ for ii = 1:np
 
 subplot(3,4,ii);
 
-plot(xV(ii+nc,:)) ;
+plot(xV(ii+nc,:),'k-','LineWidth',2) ;
 hold on
-
+xlabel("Day");
+ylabel("Value")
 title(legendStr{ii});
 end
 

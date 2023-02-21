@@ -9,7 +9,7 @@ function [x,P,Xnext]=ukfConstrained(fstate,x,P,hmeas,z,Q,R,sigmaLimitsMin,sigmaL
 % Inputs:   f: function handle for f(x)
 %           x: "a priori" state estimate
 %           P: "a priori" estimated state covariance
-%           h: fanction handle for h(x)
+%           h: function handle for h(x)
 %           z: current measurement
 %           Q: process noise covariance
 %           R: measurement noise covariance
@@ -72,7 +72,7 @@ X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax);          % constrain
 X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax);          % constrain
 % X1=sigmas(x1,P1,c);                         %sigma points around x1
 % X2=X1-x1(:,ones(1,size(X1,2)));             %deviation of X1
-[z1,Z1,P2,Z2]=ut(hmeas,X1,Wm,Wc,m,R);       %unscented transformation of measurments
+[z1,Z1,P2,Z2]=ut(hmeas,X1,Wm,Wc,m,R);       %unscented transformation of measurements
 P12=X2*diag(Wc)*Z2';                        %transformed cross-covariance
 K=P12/P2; %*inv(P2);
 x=x1+K*(z-z1);                              %state update
