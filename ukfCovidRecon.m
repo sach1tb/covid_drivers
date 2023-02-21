@@ -13,7 +13,11 @@ ddt= dt; % smaller timestep for stable dynamics
 % covariance of measurement
 %[infectious,death,vax,mask,mobility,Total Population]
 % multipliers: infectious is std, 
-Rp=[0.00,0.01^2,0.01^2,0.1^2,2^2,0.01^2]; 
+% for population Census.gov says 90% confidence level
+% For a 90% confidence level, the critical factor or z-value is 1.645 
+% MOE = Z*std/sqrt(n)
+% https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/2019_ACS_Accuracy_Document_Worked_Examples.pdf
+Rp=[0.00,0.1^2,0.01^2,0.1^2,2^2,(0.001/1.645)^2]; 
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
 % beta0 = modelParams.beta;
@@ -67,7 +71,7 @@ Q=diag([1e-6*ones(1,nc), 0.1*parameterInit] + eps); % covariance of process
 f=@(x) seirDynamics(x,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,dt);  % nonlinear state equations
 h=@(x) seirObservation(x);                               % measurement equation
 s=[zeros(1,nc),parameterInit]';  %
-s(1) = 9684738-24; %9.7e6-24; % initial state susceptible
+s(1) = 12830632*9.7/12.8-24; %9.7e6-24; % initial state susceptible
 s(7) = 24; % initial infections
 x=s; %initial state          % initial state with noise
 P = Q;                        % initial state covraiance
@@ -114,7 +118,11 @@ mobility = interp1(1:dt:T, mobility, 1:ddt:T);
 
 dayStops = [1 332 697 1002]; 
 % data source https://www.statista.com/statistics/815172/chicago-metro-area-population/
-popChicagoMetro = [9684738 9601605 9509934 9433330]; 
+% popChicagoMetro = [9684738 9601605 9509934 9433330]; 
+
+% census.gov
+popChicagoMetro = [12830632, 12812508, 12671469, 12582032]*9.7/12.8;
+
 
 popDays = interp1(dayStops,popChicagoMetro,days);
 popDays = interp1(1:dt:T, popDays, 1:ddt:T);
@@ -157,16 +165,19 @@ for k=1:T
     end
 end
 
-
+% Post calculation filters (smoothing and outlier removal)
+smooth_yes=1;
+if smooth_yes
+    for jj = 1:n
+        %xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
+        % smooth smoothens dynamocs as well
+    %     xV(jj,:)= smooth(xV(jj,:),28,'lowess');
+        xV(jj,:)= sma(xV(jj,:),7);
+    end
+end
 
 save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV');
 
-% Post calculation filters (smoothing and outlier removal)
-for jj = 1:n
-    %xV(jj,:) = filloutliers(xV(jj,:),'nearest',2); 
-    % smooth smoothens dynamocs as well
-%     xV(jj,:)= smooth(xV(jj,:),28,'lowess');
-end
 
 %% plot results
 figure(1); gcf; clf;
