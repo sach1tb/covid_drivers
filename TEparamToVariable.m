@@ -13,7 +13,7 @@ dxk = diff(sigmaPoints,1,3);
 
 
 % windowSizeDays size for TE
-windowSizeDays = 16*7;
+windowSizeDays = 12*7;
 % # of samples from the UKF
 nSigmaPoints = 24;
 

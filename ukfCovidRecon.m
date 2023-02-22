@@ -24,10 +24,10 @@ Rp=[0.00,0.1^2,0.01^2,0.1^2,2^2,(0.001/1.645)^2];
 % mu0 = modelParams.mu;
 % epsilon0 = modelParams.epsilon; %1.0 - optimised
 % gamma0 = modelParams.gamma;
-% eta_Ih0 = modelParams.eta_Ih;
-% eta_Im0 = modelParams.eta_Im;
-% eta_Sh0 = modelParams.eta_Sh;
-% eta_Sm0 = modelParams.eta_Sm;
+eta_Ih0 = modelParams.eta_Ih;
+eta_Im0 = modelParams.eta_Im;
+eta_Sh0 = modelParams.eta_Sh;
+eta_Sm0 = modelParams.eta_Sm;
 % kappa0=modelParams.kappa0;
 % sigma0=modelParams.sigma0;
 % alpha0 = modelParams.alpha;
@@ -42,10 +42,10 @@ beta0 = 0.5;  %transmissibility
 mu0 = 2e-4; %Mortality
 epsilon0 = 1.0; %1.0 - optimised, rate of progression to infectious class
 gamma0 = 0.0110; % Rate of recovery
-eta_Ih0 = 0.1; % used in lambda calculation
-eta_Im0 = 0.1; % used in lambda calculation
-eta_Sh0 = 0.1;  % used in lambda calculation
-eta_Sm0 = 0.1;  % used in lambda calculation
+% eta_Ih0 = 0.1; % used in lambda calculation
+% eta_Im0 = 0.1; % used in lambda calculation
+% eta_Sh0 = 0.1;  % used in lambda calculation
+% eta_Sm0 = 0.1;  % used in lambda calculation
 kappa0 = 0.1; % because all kappas are same but may depend on compartment sizes
 sigma0 = 0.0001; % because all sigmas are same
 alpha0 = 0.001;  % Vaccination rate [Maged2022]
@@ -207,10 +207,20 @@ ylabel("Population")
 title('Exposed')
 
 subplot(3,3,3)
+
+%waves
+waves = [201, 376;
+    627, 761;
+    775, 958];
+
 plot(dateData,infectious,'k-','LineWidth',2);
 hold on
 plot(dateData,xV(7,:)+xV(8,:)+xV(9,:),'r--','LineWidth',2)
-%set(gca,'Xtick',linspace(startDate,endDate,numberOfXTicks))
+for i = 1:size(waves,1)
+    temp = rectangle('Position',[waves(i,1)+dateData(1),0,waves(i,2)-waves(i,1),max(infectious)],'FaceColor',[0.5 0.5 0.5 0.3]);
+    temp.EdgeColor = 'none';
+end
+
 ax = gca;
 ax.XMinorTick = 'on';
 ax.XTick = datenum(dateData);
