@@ -13,49 +13,64 @@ fall = [280, 376;
 plotTE1(rise,fall);
 
 %% 
+startDate = datenum('02-04-2020');
+endDate = datenum('11-01-2022');
+dateData = linspace(startDate,endDate,1002);
+numberOfXTicks = 3;
+
 figure(1); gcf;
 
-set(gca, 'xlim', [fall(1,1), fall(1,2)]);
-print('-dpng', 'manuscript\plots\h-fall1.png')
+set(gca, 'xlim', [dateData(1)+fall(1,1), dateData(1)+fall(1,2)]);
+% set(gca, 'xtick', ceil(linspace(fall(1,1), fall(1,2), numberOfXTicks)));
+% datetick('x','mmm, yy', 'keepticks')
+title('Wave 1 (fall)');
 
-set(gca, 'xlim', [fall(2,1), fall(2,2)]);
-print('-dpng', 'manuscript\plots\h-fall2.png')
+print('-dpng', 'plots\h-fall1.png')
 
-set(gca, 'xlim', [fall(3,1), fall(3,2)]);
-print('-dpng', 'manuscript\plots\h-fall3.png')
+set(gca, 'xlim', [dateData(1)+fall(2,1), dateData(1)+fall(2,2)]);
+title('Wave 2 (fall)');
+print('-dpng', 'plots\h-fall2.png')
+
+
+set(gca, 'xlim', [dateData(1)+fall(3,1), dateData(1)+fall(3,2)]);
+title('Wave 3 (fall)');
+print('-dpng', 'plots\h-fall3.png')
 
 
 figure(2); gcf;
-set(gca, 'xlim', [rise(1,1), rise(1,2)]);
-print('-dpng', 'manuscript\plots\h-rise1.png')
+set(gca, 'xlim', [dateData(1)+rise(1,1), dateData(1)+rise(1,2)]);
+title('Wave 1 (rise)');
+print('-dpng', 'plots\h-rise1.png')
 
-set(gca, 'xlim', [rise(2,1), rise(2,2)]);
-print('-dpng', 'manuscript\plots\h-rise2.png')
+set(gca, 'xlim', [dateData(1)+rise(2,1), dateData(1)+rise(2,2)]);
+title('Wave 2 (rise)');
+print('-dpng', 'plots\h-rise2.png')
 
-set(gca, 'xlim', [rise(3,1), rise(3,2)]);
-print('-dpng', 'manuscript\plots\h-rise3.png')
+set(gca, 'xlim', [dateData(1)+rise(3,1), dateData(1)+rise(3,2)]);
+title('Wave 3 (rise)');
+print('-dpng', 'plots\h-rise3.png')
 
 
 
 figure(3); gcf;
 
-set(gca, 'xlim', [rise(1,1), rise(1,2)]);
-print('-dpng', 'manuscript\plots\a-rise1.png')
+set(gca, 'xlim', [dateData(1)+rise(1,1), dateData(1)+rise(1,2)]);
+print('-dpng', 'plots\a-rise1.png')
 
-set(gca, 'xlim', [rise(2,1), rise(2,2)]);
-print('-dpng', 'manuscript\plots\a-rise2.png')
+set(gca, 'xlim', [dateData(1)+rise(2,1), dateData(1)+rise(2,2)]);
+print('-dpng', 'plots\a-rise2.png')
 
 set(gca, 'xlim', [rise(3,1), rise(3,2)]);
-print('-dpng', 'manuscript\plots\a-rise3.png')
+print('-dpng', 'plots\a-rise3.png')
 
-set(gca, 'xlim', [fall(1,1), fall(1,2)]);
-print('-dpng', 'manuscript\plots\a-fall1.png')
+set(gca, 'xlim', [dateData(1)+fall(1,1), dateData(1)+fall(1,2)]);
+print('-dpng', 'plots\a-fall1.png')
 
-set(gca, 'xlim', [fall(2,1), fall(2,2)]);
-print('-dpng', 'manuscript\plots\a-fall2.png')
+set(gca, 'xlim', [dateData(1)+fall(2,1), dateData(1)+fall(2,2)]);
+print('-dpng', 'plots\a-fall2.png')
 
-set(gca, 'xlim', [fall(3,1), fall(3,2)]);
-print('-dpng', 'manuscript\plots\a-fall3.png')
+set(gca, 'xlim', [dateData(1)+fall(3,1), dateData(1)+fall(3,2)]);
+print('-dpng', 'plots\a-fall3.png')
 
 
 
@@ -77,8 +92,13 @@ addpath(['boundedline', filesep, 'boundedline'])
 addpath(['boundedline', filesep, 'Inpaint_nans'])
 windowSizeDays = 12*7;
 
+% to show dates on x-axis
+startDate = datenum('02-04-2020');
+endDate = datenum('11-01-2022');
+dateData = linspace(startDate,endDate,T);
+numberOfXTicks = 30;
 
-
+%% for rises
 figure(1)
 clf;
 NetTE_phi1_Itot(isnan(NetTE_phi1_Itot))=0;
@@ -89,28 +109,28 @@ NetTE_phi2_Itot(isnan(NetTE_phi2_Itot))=0;
 NetTE_xi1_Itot(isnan(NetTE_xi1_Itot))=0;
 NetTE_sigma_Itot(isnan(NetTE_sigma_Itot))=0;
 
-
+TErange=(dateData(1):(dateData(end)-windowSizeDays))+windowSizeDays/2;
 
 
 meanNetTE_phi1_Itot = mean(NetTE_phi1_Itot);
 stdNetTE_phi1_Itot = std(NetTE_phi1_Itot);
-h1 = plot(windowSizeDays/2+(1:numel(meanNetTE_phi1_Itot)),meanNetTE_phi1_Itot,'-r');
+h1 = plot(TErange,meanNetTE_phi1_Itot,'-r');
 hold on
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_phi1_Itot)),meanNetTE_phi1_Itot,stdNetTE_phi1_Itot, '-r','alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_phi1_Itot,stdNetTE_phi1_Itot, '-r','alpha','linewidth',1.2);
 
 meanNetTE_xi2_Itot = mean(NetTE_xi2_Itot);
 stdNetTE_xi2_Itot = std(NetTE_xi2_Itot);
-h2 = plot(windowSizeDays/2+(1:numel(meanNetTE_xi2_Itot)),meanNetTE_xi2_Itot,'-g');
+h2 = plot(TErange,meanNetTE_xi2_Itot,'-g');
 hold on
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_xi2_Itot)),meanNetTE_xi2_Itot,stdNetTE_xi2_Itot, '-g','alpha','linewidth',1.2);
-h3 = plot(infectious/max(infectious),'k--','LineWidth',2);
+boundedline(TErange,meanNetTE_xi2_Itot,stdNetTE_xi2_Itot, '-g','alpha','linewidth',1.2);
+h3 = plot(dateData, infectious/max(infectious),'k--','LineWidth',2);
 
 
 meanNetTE_alpha_Itot = mean(NetTE_alpha_Itot);
 stdNetTE_alpha_Itot = std(NetTE_alpha_Itot);
-h4 = plot(windowSizeDays/2+(1:numel(meanNetTE_alpha_Itot)),meanNetTE_alpha_Itot,'-b');
+h4 = plot(TErange,meanNetTE_alpha_Itot,'-b');
 hold on
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_alpha_Itot)),meanNetTE_alpha_Itot,stdNetTE_alpha_Itot, '-b','alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_alpha_Itot,stdNetTE_alpha_Itot, '-b','alpha','linewidth',1.2);
 % for i = 1:size(fall,1)
 %     temp = rectangle('Position',[fall(i,1),-0.6,fall(i,2)-fall(i,1),1+0.6],'FaceColor',[1.0 0.3 0.3 0.3]);
 %     temp.EdgeColor = 'none';
@@ -119,31 +139,35 @@ boundedline(windowSizeDays/2+(1:numel(meanNetTE_alpha_Itot)),meanNetTE_alpha_Ito
 legend([h1,h2, h4, h3],'${\phi_1 \rightarrow \dot{I}}$','${\xi_{2} \rightarrow \dot{I}}$' ...
     ,'${\alpha \rightarrow \dot{I}}$','$\hat{I}$','interpreter','latex', 'location', 'northeastoutside');
 ylabel('Net TE (bits)');
-xlabel('Window #')
+set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
+set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+datetick('x','mmm, yy', 'keepticks')
 set(gca, 'fontsize', 20);
 ylim([-0.6 1]);
 grid on
 
+
+%% for falls
 figure(2)
 
 meanNetTE_phi2_Itot = mean(NetTE_phi2_Itot);
 stdNetTE_phi2_Itot = std(NetTE_phi2_Itot);
-h5 = plot(windowSizeDays/2+(1:numel(meanNetTE_phi2_Itot)),meanNetTE_phi2_Itot,'-r');
+h5 = plot(TErange,meanNetTE_phi2_Itot,'-r');
 hold on
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_phi2_Itot)),meanNetTE_phi2_Itot,stdNetTE_phi2_Itot, '-r','alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_phi2_Itot,stdNetTE_phi2_Itot, '-r','alpha','linewidth',1.2);
 
 meanNetTE_xi1_Itot = mean(NetTE_xi1_Itot);
 stdNetTE_xi1_Itot = std(NetTE_xi1_Itot);
-h6 = plot(windowSizeDays/2+(1:numel(meanNetTE_xi1_Itot)),meanNetTE_xi1_Itot,'-g');
+h6 = plot(TErange,meanNetTE_xi1_Itot,'-g');
 hold on
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_xi1_Itot)),meanNetTE_xi1_Itot,stdNetTE_xi1_Itot, '-g','alpha','linewidth',1.2);
-h7 = plot(infectious/max(infectious),'k--','LineWidth',2);
+boundedline(TErange,meanNetTE_xi1_Itot,stdNetTE_xi1_Itot, '-g','alpha','linewidth',1.2);
+h7 = plot(dateData, infectious/max(infectious),'k--','LineWidth',2);
 
 meanNetTE_sigma_Itot = mean(NetTE_sigma_Itot);
 stdNetTE_sigma_Itot = std(NetTE_sigma_Itot);
-h8 = plot(windowSizeDays/2+(1:numel(meanNetTE_sigma_Itot)),meanNetTE_sigma_Itot,'-b');
+h8 = plot(TErange,meanNetTE_sigma_Itot,'-b');
 hold on
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_sigma_Itot)),meanNetTE_sigma_Itot,stdNetTE_sigma_Itot, '-b','alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_sigma_Itot,stdNetTE_sigma_Itot, '-b','alpha','linewidth',1.2);
 
 % for i = 1:size(rise,1)
 %     temp = rectangle('Position',[rise(i,1),-0.6,rise(i,2)-rise(i,1),1+0.6],'FaceColor',[0.3 0.3 1.0 0.3]);
@@ -154,48 +178,50 @@ boundedline(windowSizeDays/2+(1:numel(meanNetTE_sigma_Itot)),meanNetTE_sigma_Ito
 legend([h5,h6,h8,h7],'${\phi_{2} \rightarrow \dot{I}}$','${\xi_{1} \rightarrow \dot{I}}$', ...
     '${\sigma \rightarrow \dot{I}}$','$\hat{I}$','interpreter','latex', 'location', 'northeastoutside');
 ylabel('Net TE (bits)');
-xlabel('Window #')
-set(gca, 'fontsize', 20);
+set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
+set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+datetick('x','mmm, yy', 'keepticks')
+
 ylim([-0.6 1]);
 grid on
 set(gca, 'fontsize', 20);
 %NetTE_sigma_Itot(i,k)
 figure(3)
 
-h1 = plot(windowSizeDays/2+(1:numel(meanNetTE_phi1_Itot)),meanNetTE_phi1_Itot,'linewidth',1.2);
+h1 = plot(TErange,meanNetTE_phi1_Itot,'linewidth',1.2);
 c = get(h1,'Color');
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_phi1_Itot)),meanNetTE_phi1_Itot,stdNetTE_phi1_Itot,'Color', c,'alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_phi1_Itot,stdNetTE_phi1_Itot,'Color', c,'alpha','linewidth',1.2);
 hold on
 
-h2 = plot(windowSizeDays/2+(1:numel(meanNetTE_xi2_Itot)),meanNetTE_xi2_Itot,'linewidth',1.2);
+h2 = plot(TErange,meanNetTE_xi2_Itot,'linewidth',1.2);
 c = get(h2,'Color');
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_xi2_Itot)),meanNetTE_xi2_Itot,stdNetTE_xi2_Itot,'Color', c,'alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_xi2_Itot,stdNetTE_xi2_Itot,'Color', c,'alpha','linewidth',1.2);
 
-h3 = plot(windowSizeDays/2+(1:numel(meanNetTE_alpha_Itot)),meanNetTE_alpha_Itot,'linewidth',1.2);
+h3 = plot(TErange,meanNetTE_alpha_Itot,'linewidth',1.2);
 c = get(h3,'Color');
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_alpha_Itot)),meanNetTE_alpha_Itot,stdNetTE_alpha_Itot,'Color', c,'alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_alpha_Itot,stdNetTE_alpha_Itot,'Color', c,'alpha','linewidth',1.2);
 
 
-h4 = plot(windowSizeDays/2+(1:numel(meanNetTE_phi2_Itot)),meanNetTE_phi2_Itot,'linewidth',1.2);
+h4 = plot(TErange,meanNetTE_phi2_Itot,'linewidth',1.2);
 c = get(h4,'Color');
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_phi2_Itot)),meanNetTE_phi2_Itot,stdNetTE_phi2_Itot,'Color', c,'alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_phi2_Itot,stdNetTE_phi2_Itot,'Color', c,'alpha','linewidth',1.2);
 
-h5 = plot(windowSizeDays/2+(1:numel(meanNetTE_xi1_Itot)),meanNetTE_xi1_Itot,'linewidth',1.2);
+h5 = plot(TErange,meanNetTE_xi1_Itot,'linewidth',1.2);
 c = get(h5,'Color');
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_xi1_Itot)),meanNetTE_xi1_Itot,stdNetTE_xi1_Itot,'Color', c,'alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_xi1_Itot,stdNetTE_xi1_Itot,'Color', c,'alpha','linewidth',1.2);
 
-h6 = plot(windowSizeDays/2+(1:numel(meanNetTE_sigma_Itot)),meanNetTE_sigma_Itot,'linewidth',1.2);
+h6 = plot(TErange,meanNetTE_sigma_Itot,'linewidth',1.2);
 c = get(h6,'Color');
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_sigma_Itot)),meanNetTE_sigma_Itot,stdNetTE_sigma_Itot,'Color', c,'alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_sigma_Itot,stdNetTE_sigma_Itot,'Color', c,'alpha','linewidth',1.2);
 
 meanNetTE_kappa_Itot = mean(NetTE_kappa_Itot);
 stdNetTE_kappa_Itot = std(NetTE_kappa_Itot);
 
-h7 = plot(windowSizeDays/2+(1:numel(meanNetTE_kappa_Itot)),meanNetTE_kappa_Itot,'linewidth',1.2);
+h7 = plot(TErange,meanNetTE_kappa_Itot,'linewidth',1.2);
 c = get(h7,'Color');
-boundedline(windowSizeDays/2+(1:numel(meanNetTE_kappa_Itot)),meanNetTE_kappa_Itot,stdNetTE_kappa_Itot,'Color', c,'alpha','linewidth',1.2);
+boundedline(TErange,meanNetTE_kappa_Itot,stdNetTE_kappa_Itot,'Color', c,'alpha','linewidth',1.2);
 
-h8 = plot(infectious/max(infectious),'k--','LineWidth',2);
+h8 = plot(dateData, infectious/max(infectious),'k--','LineWidth',2);
 ylim([-0.6 1]);
 grid on
 legend([h1,h2,h3,h4,h5,h6,h7, h8],'${\phi_{1} \rightarrow \dot{I}}$' ...
@@ -207,6 +233,11 @@ legend([h1,h2,h3,h4,h5,h6,h7, h8],'${\phi_{1} \rightarrow \dot{I}}$' ...
     ,'${\kappa \rightarrow \dot{I}}$' ...
     , '$\hat{I}$','interpreter','latex', 'location', 'northeastoutside');
 set(gca, 'fontsize', 20);
+
+set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
+set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+datetick('x','mmm, yy', 'keepticks')
+
 % for i = 1:size(fall,1)
 %     temp = rectangle('Position',[fall(i,1),-0.6,fall(i,2)-fall(i,1),1+0.6],'FaceColor',[1.0 0.3 0.3 0.3]);
 %     temp.EdgeColor = 'none';

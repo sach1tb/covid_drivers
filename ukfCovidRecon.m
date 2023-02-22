@@ -4,6 +4,7 @@ addpath(['boundedline', filesep, 'boundedline'])
 addpath(['boundedline', filesep, 'Inpaint_nans'])
 load fminconOptimisedParameters.mat
 
+
 nc=13; np=11;
 n=nc+np;%number of state
 m = 6; %number of measurements
@@ -17,7 +18,7 @@ ddt= dt; % smaller timestep for stable dynamics
 % For a 90% confidence level, the critical factor or z-value is 1.645
 % MOE = Z*std/sqrt(n)
 % https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/2019_ACS_Accuracy_Document_Worked_Examples.pdf
-Rp=[0.00,0.1^2,0.01^2,0.1^2,2^2,(0.001/1.645)^2];
+Rp=[0.00,0.1^2,0.01^2,0.1^2,2^2,(0.001/1.645)^2];%
 
 %-- fmnincon optimal parameters (taking the first element of each parameter vector)
 % beta0 = modelParams.beta;
