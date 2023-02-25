@@ -63,7 +63,11 @@ Wc=Wm;
 Wc(1)=Wc(1)+(1-alpha^2+beta);               %weights for covariance
 c=sqrt(c);
 
-P=nearestSPD(P); % ideally this should go
+try 
+    chol(P);
+catch
+    P=nearestSPD(P); % ideally this should go
+end
 X=sigmas(x,P,c);                            %sigma points around x
 X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax);          % constrain
 

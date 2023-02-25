@@ -13,7 +13,11 @@ ddt= dt; % smaller timestep for stable dynamics
 
 % covariance of measurement
 %[infectious,death,vax,mask,mobility,Total Population]
-% multipliers: infectious is std,
+% multipliers: 
+% infectious is std based on upper and lower bounds
+% death is 10% because it is large
+% vaccination is 1%
+% 
 % for population Census.gov says 90% confidence level
 % For a 90% confidence level, the critical factor or z-value is 1.645
 % MOE = Z*std/sqrt(n)
@@ -39,36 +43,41 @@ Rp=[0.00,0.1^2,0.01^2,0.1^2,2^2,(0.001/1.645)^2];%
 % xi10 = modelParams.xi1;
 
 
-beta0 = 0.5;  %transmissibility
-mu0 = 2e-4; %Mortality
-epsilon0 = 1.0; %1.0 - optimised, rate of progression to infectious class
-gamma0 = 0.0110; % Rate of recovery
-eta_Ih0 = 0.99; % used in lambda calculation
-eta_Im0 = 0.69; % used in lambda calculation
-eta_Sh0 = eta_Ih0;  % used in lambda calculation
-eta_Sm0 = eta_Im0/2;  % used in lambda calculation
-kappa0 = 0.1; % because all kappas are same but may depend on compartment sizes
-sigma0 = 0.0001; % because all sigmas are same
+beta0 = 0.312;  % transmissibility [Maged2022, table 2]
+mu0 = 0.035; % Mortality [Maged2022, table 2]
+epsilon0 = 1.0/4.5; % [Maged2022, pp 5]
+gamma0 = 0.0602; % Rate of recovery, [Maged2022, pp 5]
+eta_Ih0 = 0.99; % decrease in infectivity because of isolation
+eta_Im0 = 0.69; % decrease in infectivity because of masks
+eta_Sh0 = eta_Ih0;  % decrease in susceptibility because of isolation
+eta_Sm0 = eta_Im0/2;  % decrease in susceptibility because of masks
+kappa0 = 1/240; % loss of immunity, initial should be low
+sigma0 = 1/240; % loss of immunity, initial should be low
 alpha0 = 0.001;  % Vaccination rate [Maged2022]
 
-phi10 = 0.01; % S -> S_m
-phi20 = 0.01;  % S_m -> S
-xi20 = 0.001; % S -> S_h
-xi10 = 0.001;  % S_h -> S
+% next 4 are simply small to begin with represent 10% rate of movement on
+% either side
+phi10 = 0.1; % S -> S_m 
+phi20 = 0.1;  % S_m -> S
+xi20 = 0.1; % S -> S_h
+xi10 = 0.1;  % S_h -> S
 
 
 % initial estimate
 
 parameterInit = [beta0,xi20,xi10 ...
-    alpha0,phi10,phi20,sigma0,kappa0, ...
-    mu0, gamma0, epsilon0];
+                alpha0,phi10,phi20, ...
+                sigma0,kappa0, mu0,...
+                gamma0, epsilon0];
 
 
 % sigma limits for constrained ukf
-sigmaLimitsMax = [1e7*ones(1,nc), ones(1,np)];
-sigmaLimitsMin = [0*ones(1,nc), 0*ones(1,np)];
+sigmaLimitsMax = [1e7*ones(1,nc), 1 1 1 1 1 1 1 1 0.2 1 0.25];
+sigmaLimitsMin = [0*ones(1,nc), 0.3 0*ones(1,np-1)]+eps;
 
-Q=diag([1e-12*ones(1,nc), 0.1*parameterInit] + eps); % covariance of process
+Q=diag([1e-6*ones(1,nc), 0.1^2*beta0, 0.1^2*xi20,0.1^2*xi10 ...
+    0.1^2*alpha0,0.1^2*phi10,0.1^2*phi20,0.1^2*sigma0,0.1^2*kappa0, ...
+    0.1^2*mu0, 0.1^2*gamma0, 0.1^2*epsilon0]); % covariance of process
 f=@(x) seirDynamics(x,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,dt);  % nonlinear state equations
 h=@(x) seirObservation(x);                               % measurement equation
 s=[zeros(1,nc),parameterInit]';  %
@@ -152,10 +161,27 @@ for k=1:T
     % z(4) = (xk(2)+xk(5)+xk(8))/totPop; % Mask
     % z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
     % z(6) = totPop; % population
-
-
-    R = diag([infectious_std(k)^2, zk(2)*Rp(2), zk(3)*Rp(3),Rp(4), Rp(5), zk(6)*Rp(6)]);
-    [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,R,sigmaLimitsMin,sigmaLimitsMax);            % ekf
+    % only let sigma increase if 240 days have passed since vaccination started
+    % 240 days from Truszkowska, revax, supplementary
+    if k>240
+        if vax(k-240)<1 
+            sigmaLimitsMax(7+nc)=eps;
+        else
+            sigmaLimitsMax(7+nc)=1;
+        end
+    else
+        sigmaLimitsMax(7+nc)=eps;
+    end
+    % only let kappa grow after 240 days assuming first person infected
+    % loses immunity
+    if k<240
+        sigmaLimitsMax(8+nc)=eps;
+    else
+        sigmaLimitsMax(8+nc)=1;
+    end
+    
+    Rt = diag([infectious_std(k)^2, zk(2)*Rp(2), zk(3)*Rp(3),Rp(4), Rp(5), zk(6)*Rp(6)]);
+    [x, P, Xprev] = ukfConstrained(f,x,P,h,zk,Q,Rt,sigmaLimitsMin,sigmaLimitsMax);            % ekf
     sigmaPointAccumulutor(:,:,k) = Xprev;
     covarianceMatrix(:,:,k) = P;
     pmat(:,:,k) = P;
@@ -200,7 +226,7 @@ set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
 datetick('x','mmm, yy', 'keepticks')
 
-%xlabel("Day");
+set(gca, 'ylim', [s(1)/10, s(1)]);
 ylabel("Population")
 title('Susceptible')
 
@@ -211,7 +237,7 @@ grid on;
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
 datetick('x','mmm, yy', 'keepticks')
-%xlabel("Day");
+set(gca, 'ylim', [0, 3e6]);
 ylabel("Population")
 title('Exposed')
 
@@ -234,6 +260,7 @@ end
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
 datetick('x','mmm, yy', 'keepticks')
+set(gca, 'ylim', [0, 15e4]);
 ylabel("Population")
 title('Infectious')
 
@@ -244,6 +271,7 @@ grid on;
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
 datetick('x','mmm, yy', 'keepticks')
+set(gca, 'ylim', [0, 10e5]);
 ylabel("Population")
 title('Recovered')
 
@@ -256,6 +284,7 @@ hold on
 plot(dateData,xV(11,:),'r--','LineWidth',2)
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+set(gca, 'ylim', [0, 4e4]);
 datetick('x','mmm, yy', 'keepticks')
 ylabel("Population")
 title('Deaths (Cumulative)')
@@ -268,6 +297,7 @@ hold on
 plot(dateData,xV(13,:),'r--','LineWidth',2)
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+set(gca, 'ylim', [0, 10e6]);
 datetick('x','mmm, yy', 'keepticks')
 ylabel("Population")
 title('Vaccinated (Cumulative)')
@@ -275,6 +305,7 @@ title('Vaccinated (Cumulative)')
 
 subplot(3,3,7)
 plot(dateData,mask,'k-','LineWidth',2);
+set(gca, 'ylim', [0, 1]);
 grid on;
 hold on
 
@@ -287,6 +318,7 @@ title('Masked')
 
 subplot(3,3,8)
 plot(dateData,mobility,'k-','LineWidth',2);
+set(gca, 'ylim', [-100, 0]);
 grid on;
 hold on
 
@@ -304,6 +336,7 @@ hold on;
 plot(dateData,sum(xV([1:10, 12],:),1),'r--','LineWidth',2)
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+set(gca, 'ylim', [10e6*0.95, 10e6]);
 datetick('x','mmm, yy', 'keepticks')
 ylabel("Population")
 title('Total population')
@@ -345,6 +378,7 @@ plot(dateData,xV(3,:),'LineWidth',2);
 grid on;
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+set(gca, 'ylim', [0, s(1)]);
 datetick('x','mmm, yy', 'keepticks');
 title('Susceptible')
 legend("S","S_m","S_h", 'location','northeastoutside');
@@ -359,6 +393,7 @@ plot(dateData,xV(6,:),'LineWidth',2);
 grid on;
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+set(gca, 'ylim', [0, 3e6]);
 datetick('x','mmm, yy', 'keepticks');
 title('Exposed')
 legend("E","E_m","E_h", 'location','northeastoutside');
@@ -373,6 +408,7 @@ plot(dateData,xV(9,:),'LineWidth',2);
 grid on;
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
+set(gca, 'ylim', [0, 15e4]);
 datetick('x','mmm, yy', 'keepticks');
 title('Infectious')
 legend("I","I_m","I_h", 'location','northeastoutside');
