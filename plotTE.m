@@ -101,13 +101,7 @@ numberOfXTicks = 30;
 %% for rises
 figure(1)
 clf;
-NetTE_phi1_Itot(isnan(NetTE_phi1_Itot))=0;
-NetTE_xi2_Itot(isnan(NetTE_xi2_Itot))=0;
-NetTE_alpha_Itot(isnan(NetTE_alpha_Itot))=0;
 
-NetTE_phi2_Itot(isnan(NetTE_phi2_Itot))=0;
-NetTE_xi1_Itot(isnan(NetTE_xi1_Itot))=0;
-NetTE_sigma_Itot(isnan(NetTE_sigma_Itot))=0;
 
 TErange=(dateData(1):(dateData(end)-windowSizeDays))+windowSizeDays/2;
 
@@ -123,9 +117,10 @@ stdNetTE_xi2_Itot = std(NetTE_xi2_Itot);
 h2 = plot(TErange,meanNetTE_xi2_Itot,'-g');
 hold on
 boundedline(TErange,meanNetTE_xi2_Itot,stdNetTE_xi2_Itot, '-g','alpha','linewidth',1.2);
-h3 = plot(dateData, infectious/max(infectious),'k--','LineWidth',2);
+yyaxis right
+h3 = plot(dateData, infectious,'k--','LineWidth',2);
 
-
+yyaxis left
 meanNetTE_alpha_Itot = mean(NetTE_alpha_Itot);
 stdNetTE_alpha_Itot = std(NetTE_alpha_Itot);
 h4 = plot(TErange,meanNetTE_alpha_Itot,'-b');
@@ -143,7 +138,7 @@ set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
 datetick('x','mmm, yy', 'keepticks')
 set(gca, 'fontsize', 20);
-ylim([-0.6 1]);
+ylim([-0.2 0.2]);
 grid on
 
 
@@ -161,13 +156,20 @@ stdNetTE_xi1_Itot = std(NetTE_xi1_Itot);
 h6 = plot(TErange,meanNetTE_xi1_Itot,'-g');
 hold on
 boundedline(TErange,meanNetTE_xi1_Itot,stdNetTE_xi1_Itot, '-g','alpha','linewidth',1.2);
-h7 = plot(dateData, infectious/max(infectious),'k--','LineWidth',2);
-
+yyaxis right
+h7 = plot(dateData, infectious,'k--','LineWidth',2);
+yyaxis left
 meanNetTE_sigma_Itot = mean(NetTE_sigma_Itot);
 stdNetTE_sigma_Itot = std(NetTE_sigma_Itot);
 h8 = plot(TErange,meanNetTE_sigma_Itot,'-b');
 hold on
 boundedline(TErange,meanNetTE_sigma_Itot,stdNetTE_sigma_Itot, '-b','alpha','linewidth',1.2);
+
+meanNetTE_kappa_Itot = mean(NetTE_kappa_Itot);
+stdNetTE_kappa_Itot = std(NetTE_kappa_Itot);
+h9 = plot(TErange,meanNetTE_kappa_Itot,'-c');
+hold on
+boundedline(TErange,meanNetTE_kappa_Itot,stdNetTE_kappa_Itot, '-c','alpha','linewidth',1.2);
 
 % for i = 1:size(rise,1)
 %     temp = rectangle('Position',[rise(i,1),-0.6,rise(i,2)-rise(i,1),1+0.6],'FaceColor',[0.3 0.3 1.0 0.3]);
@@ -175,14 +177,14 @@ boundedline(TErange,meanNetTE_sigma_Itot,stdNetTE_sigma_Itot, '-b','alpha','line
 % end
 
 
-legend([h5,h6,h8,h7],'${\phi_{2} \rightarrow \dot{I}}$','${\xi_{1} \rightarrow \dot{I}}$', ...
-    '${\sigma \rightarrow \dot{I}}$','$\hat{I}$','interpreter','latex', 'location', 'northeastoutside');
+legend([h5,h6,h8,h9,h7],'${\phi_{2} \rightarrow \dot{I}}$','${\xi_{1} \rightarrow \dot{I}}$', ...
+    '${\sigma \rightarrow \dot{I}}$',  '${\kappa \rightarrow \dot{I}}$','$\hat{I}$','interpreter','latex', 'location', 'northeastoutside');
 ylabel('Net TE (bits)');
 set(gca, 'xtick', ceil(linspace(dateData(1), dateData(T), numberOfXTicks)));
 set(gca, 'XLimSpec', 'Tight', 'fontsize', 16);
 datetick('x','mmm, yy', 'keepticks')
 
-ylim([-0.6 1]);
+ylim([-0.2 0.2]);
 grid on
 set(gca, 'fontsize', 20);
 %NetTE_sigma_Itot(i,k)
@@ -220,9 +222,10 @@ stdNetTE_kappa_Itot = std(NetTE_kappa_Itot);
 h7 = plot(TErange,meanNetTE_kappa_Itot,'linewidth',1.2);
 c = get(h7,'Color');
 boundedline(TErange,meanNetTE_kappa_Itot,stdNetTE_kappa_Itot,'Color', c,'alpha','linewidth',1.2);
-
-h8 = plot(dateData, infectious/max(infectious),'k--','LineWidth',2);
-ylim([-0.6 1]);
+yyaxis right
+h8 = plot(dateData, infectious,'k--','LineWidth',2);
+yyaxis left
+ylim([-0.2 0.2]);
 grid on
 legend([h1,h2,h3,h4,h5,h6,h7, h8],'${\phi_{1} \rightarrow \dot{I}}$' ...
     ,'${\xi_{2} \rightarrow \dot{I}}$' ...

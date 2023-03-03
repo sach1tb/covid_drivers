@@ -205,7 +205,7 @@ end
 
 save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV', ...
                     'infectious', 'death', 'vax', 'mask', 'mobility', ...
-                    'popDays', 'T', 'nc', 'np');
+                    'popDays', 'T', 'nc', 'np','s');
 
 
 %% plot results
