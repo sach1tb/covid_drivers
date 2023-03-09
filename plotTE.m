@@ -82,7 +82,7 @@ end
 
 
 
-function plotTE1(rise,fall)
+function plotTE1(rise,fall,parameter)
 load('allTECal_win84.mat');
 infectious = csvread('data/infectiousIllinois_ci.csv');
 infectious=infectious(1:1002,2);

@@ -15,7 +15,7 @@ dxk = diff(sigmaPoints,1,3);
 % windowSizeDays size for TE
 windowSizeDays = 12*7;
 % # of samples from the UKF
-nSigmaPoints = 24;
+nSigmaPoints = 9;
 focussedSigmaPoints = ceil(linspace(1,49,nSigmaPoints));
 %CE_Stot_Itot_condE = zeros(nSigmaPoints,datasetLength-windowSizeDays); % (CE_X_Y_Z) conditional TE X->Y conditioned on Z
 %CE_Stot_Itot_condEm = zeros(nSigmaPoints,datasetLength-windowSizeDays);
@@ -61,39 +61,49 @@ for i =1:nSigmaPoints
     S = normalize(squeeze(dxk(1,j,:)))';
     Sm = normalize(squeeze(dxk(2,j,:)))';
     Sh= normalize(squeeze(dxk(3,j,:)))';
-    
+
     E = normalize(squeeze(dxk(4,j,:)))';
     Em = normalize(squeeze(dxk(5,j,:)))';
     Eh = normalize(squeeze(dxk(6,j,:)))';
-    
+
     I = normalize(squeeze(dxk(7,j,:)))';
     Im = normalize(squeeze(dxk(8,j,:)))';
     Ih = normalize(squeeze(dxk(9,j,:)))';
-    
+
     R = normalize(squeeze(dxk(10,j,:)))';
     D = normalize(squeeze(dxk(11,j,:)))';
     U = normalize(squeeze(dxk(12,j,:)))';
     V = normalize(squeeze(dxk(13,j,:)))';
     Stot = normalize(squeeze(dxk(1,j,:))+squeeze(dxk(2,j,:))+squeeze(dxk(3,j,:)))';
     Itot = normalize(squeeze(dxk(7,j,:))+squeeze(dxk(8,j,:))+squeeze(dxk(9,j,:)))';
+
+    %     xi2 = detrend(normalize(squeeze(sigmaPoints(16,j,2:end)))');
+    %     xi1 = detrend(normalize(squeeze(sigmaPoints(15,j,2:end)))');
+    %     phi1 = detrend(normalize(squeeze(sigmaPoints(18,j,2:end)))');
+    %     phi2 = detrend(normalize(squeeze(sigmaPoints(19,j,2:end)))');
+    %     sigma = detrend(normalize(squeeze(sigmaPoints(20,j,2:end)))');
+    %     alpha = detrend(normalize(squeeze(sigmaPoints(17,j,2:end)))');
+    %     kappa = detrend(normalize(squeeze(sigmaPoints(21,j,2:end)))');
+
+    xi2 = detrendInAWindow(normalize(squeeze(sigmaPoints(16,j,2:end)))',windowSizeDays);
+    xi1 = detrendInAWindow(normalize(squeeze(sigmaPoints(15,j,2:end)))',windowSizeDays);
+    phi1 = detrendInAWindow(normalize(squeeze(sigmaPoints(18,j,2:end)))',windowSizeDays);
+    phi2 = detrendInAWindow(normalize(squeeze(sigmaPoints(19,j,2:end)))',windowSizeDays);
+    sigma = detrendInAWindow(normalize(squeeze(sigmaPoints(20,j,2:end)))',windowSizeDays);
+    alpha = detrendInAWindow(normalize(squeeze(sigmaPoints(17,j,2:end)))',windowSizeDays);
+    kappa = detrendInAWindow(normalize(squeeze(sigmaPoints(21,j,2:end)))',windowSizeDays);
+
     
-    xi2 = detrend(normalize(squeeze(sigmaPoints(16,j,2:end)))');
-    xi1 = detrend(normalize(squeeze(sigmaPoints(15,j,2:end)))');
-    phi1 = detrend(normalize(squeeze(sigmaPoints(18,j,2:end)))');
-    phi2 = detrend(normalize(squeeze(sigmaPoints(19,j,2:end)))');
-    sigma = detrend(normalize(squeeze(sigmaPoints(20,j,2:end)))');
-    alpha = detrend(normalize(squeeze(sigmaPoints(17,j,2:end)))');
-    kappa = detrend(normalize(squeeze(sigmaPoints(21,j,2:end)))');
-    
+
     %raw values, figure 2 add vaccination rate, figure 3 add loss of immunity
     %after vaccination.
-    
+
     for k = 1:1:datasetLength-windowSizeDays
-        
+
         %TE_Stot_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),Stot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        
+
         Hy = ent(Itot(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
-        
+
         Hx = ent(phi1(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_phi1_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),phi1(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         TE_Itot_phi1(i,k) = ete_hist(phi1(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
@@ -102,28 +112,28 @@ for i =1:nSigmaPoints
         else
             NetTE_phi1_Itot(i,k) =  0;
         end
-        
-        
+
+
         Hx = ent(xi2(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_xi2_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),xi2(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         TE_Itot_xi2(i,k) = ete_hist(xi2(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        
+
         if Hx*Hy > eps
             NetTE_xi2_Itot(i,k) = (TE_xi2_Itot(i,k)-TE_Itot_xi2(i,k))/sqrt(Hx*Hy) ;
         else
             NetTE_xi2_Itot(i,k) = 0;
         end
-        
+
         Hx = ent(phi2(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_phi2_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),phi2(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         TE_Itot_phi2(i,k) = ete_hist(phi2(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
-        
+
         if Hx*Hy > eps
             NetTE_phi2_Itot(i,k) = (TE_phi2_Itot(i,k) - TE_Itot_phi2(i,k))/sqrt(Hx*Hy);
         else
             NetTE_phi2_Itot(i,k) = 0;
         end
-        
+
         Hx = ent(xi1(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_xi1_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),xi1(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         TE_Itot_xi1(i,k) = ete_hist(xi1(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
@@ -132,7 +142,7 @@ for i =1:nSigmaPoints
         else
             NetTE_xi1_Itot(i,k) = 0;
         end
-        
+
         Hx = ent(sigma(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_sigma_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),sigma(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         TE_Itot_sigma(i,k) = ete_hist(sigma(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
@@ -141,7 +151,7 @@ for i =1:nSigmaPoints
         else
             NetTE_sigma_Itot(i,k) = 0;
         end
-        
+
         Hx = ent(alpha(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_alpha_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),alpha(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         TE_Itot_alpha(i,k) = ete_hist(alpha(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
@@ -150,7 +160,7 @@ for i =1:nSigmaPoints
         else
             NetTE_alpha_Itot(i,k) = 0;
         end
-        
+
         Hx = ent(kappa(k:k+windowSizeDays-1), ceil(sqrt(windowSizeDays)), [-1 1], 'x');
         TE_kappa_Itot(i,k) = ete_hist(Itot(k:k+windowSizeDays-1),kappa(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
         TE_Itot_kappa(i,k) = ete_hist(kappa(k:k+windowSizeDays-1),Itot(k:k+windowSizeDays-1),1,ceil(sqrt(windowSizeDays)),[-1 1]);
@@ -159,10 +169,10 @@ for i =1:nSigmaPoints
         else
             NetTE_kappa_Itot(i,k) = 0;
         end
-        
-        
+
+
     end
-    
+
 end
 save(sprintf('allTEcal_win%d.mat',windowSizeDays ));
 % str = sprintf("teData_winSize%d.mat",windowSizeDays);
@@ -240,4 +250,12 @@ ylabel("Population")
 title('Infectious')
 
 
+function y = detrendInAWindow(y, windowSizeDays)
+% Detrending along a window whose size is same as the TE window
+% Alternatively we can decide the window size based on statioinarity
+% criteria
+y_smoothed = sma(y,windowSizeDays);
+y = y-y_smoothed;
+
+end
 
