@@ -61,3 +61,33 @@ hold on;
 plot(Itotdot_tedata(1,:)', 'color', [1 0 0], 'linewidth', 2)
 title('$\dot{I}$','Interpreter','latex')
 set(gca, 'fontsize', 18);
+
+
+%% plot autocorrelation
+xi_autocorr1 = xcorr(mean(xi1_tedata),mean(xi1_tedata));
+xi_autocorr2 = xcorr(mean(xi2_tedata),mean(xi2_tedata));
+phi_autocorr1 = xcorr(mean(phi1_tedata),mean(phi1_tedata));
+phi_autocorr2 = xcorr(mean(phi1_tedata),mean(phi2_tedata));
+sigma_autocorr = xcorr(mean(sigma_tedata),mean(sigma_tedata));
+alpha_autocorr = xcorr(mean(alpha_tedata),mean(alpha_tedata));
+[kappa_autocorr, lags] = xcorr(mean(kappa_tedata),mean(kappa_tedata));
+
+plot(lags,xi_autocorr1,'linewidth',1.2)
+hold on
+plot(lags,xi_autocorr2,'linewidth',1.2)
+plot(lags,phi_autocorr1,'linewidth',1.2)
+plot(lags,phi_autocorr2,'linewidth',1.2)
+plot(lags,sigma_autocorr,'linewidth',1.2)
+plot(lags,alpha_autocorr,'linewidth',1.2)
+plot(lags,kappa_autocorr,'linewidth',1.2)
+grid on
+legend('$\xi_1$' ...
+    ,'$\xi_2$' ...
+    ,'$\phi_1$' ...
+    ,'$\phi_2$' ...
+    ,'$\sigma$' ...
+    ,'$\alpha$' ...
+    ,'$\kappa$','interpreter','latex');
+xlabel('lag')
+ylabel('Autocorrelation')
+set(gca, 'fontsize', 20);
