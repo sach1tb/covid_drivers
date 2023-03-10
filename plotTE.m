@@ -82,7 +82,8 @@ end
 
 
 
-function plotTE1(rise,fall,parameter)
+function plotTE1(rise,fall)
+close all
 load('allTECal_win84.mat');
 infectious = csvread('data/infectiousIllinois_ci.csv');
 infectious=infectious(1:1002,2);
@@ -103,17 +104,19 @@ figure(1)
 clf;
 
 
+
+
 TErange=(dateData(1):(dateData(end)-windowSizeDays))+windowSizeDays/2;
 
 
-meanNetTE_phi1_Itot = mean(NetTE_phi1_Itot);
-stdNetTE_phi1_Itot = std(NetTE_phi1_Itot);
+meanNetTE_phi1_Itot = mean(NetTE_phi1_Itotdot);
+stdNetTE_phi1_Itot = std(NetTE_phi1_Itotdot);
 h1 = plot(TErange,meanNetTE_phi1_Itot,'-r');
 hold on
 boundedline(TErange,meanNetTE_phi1_Itot,stdNetTE_phi1_Itot, '-r','alpha','linewidth',1.2);
 
-meanNetTE_xi2_Itot = mean(NetTE_xi2_Itot);
-stdNetTE_xi2_Itot = std(NetTE_xi2_Itot);
+meanNetTE_xi2_Itot = mean(NetTE_xi2_Itotdot);
+stdNetTE_xi2_Itot = std(NetTE_xi2_Itotdot);
 h2 = plot(TErange,meanNetTE_xi2_Itot,'-g');
 hold on
 boundedline(TErange,meanNetTE_xi2_Itot,stdNetTE_xi2_Itot, '-g','alpha','linewidth',1.2);
@@ -121,8 +124,8 @@ yyaxis right
 h3 = plot(dateData, infectious,'k--','LineWidth',2);
 
 yyaxis left
-meanNetTE_alpha_Itot = mean(NetTE_alpha_Itot);
-stdNetTE_alpha_Itot = std(NetTE_alpha_Itot);
+meanNetTE_alpha_Itot = mean(NetTE_alpha_Itotdot);
+stdNetTE_alpha_Itot = std(NetTE_alpha_Itotdot);
 h4 = plot(TErange,meanNetTE_alpha_Itot,'-b');
 hold on
 boundedline(TErange,meanNetTE_alpha_Itot,stdNetTE_alpha_Itot, '-b','alpha','linewidth',1.2);
@@ -145,28 +148,28 @@ grid on
 %% for falls
 figure(2)
 
-meanNetTE_phi2_Itot = mean(NetTE_phi2_Itot);
-stdNetTE_phi2_Itot = std(NetTE_phi2_Itot);
+meanNetTE_phi2_Itot = mean(NetTE_phi2_Itotdot);
+stdNetTE_phi2_Itot = std(NetTE_phi2_Itotdot);
 h5 = plot(TErange,meanNetTE_phi2_Itot,'-r');
 hold on
 boundedline(TErange,meanNetTE_phi2_Itot,stdNetTE_phi2_Itot, '-r','alpha','linewidth',1.2);
 
-meanNetTE_xi1_Itot = mean(NetTE_xi1_Itot);
-stdNetTE_xi1_Itot = std(NetTE_xi1_Itot);
+meanNetTE_xi1_Itot = mean(NetTE_xi1_Itotdot);
+stdNetTE_xi1_Itot = std(NetTE_xi1_Itotdot);
 h6 = plot(TErange,meanNetTE_xi1_Itot,'-g');
 hold on
 boundedline(TErange,meanNetTE_xi1_Itot,stdNetTE_xi1_Itot, '-g','alpha','linewidth',1.2);
 yyaxis right
 h7 = plot(dateData, infectious,'k--','LineWidth',2);
 yyaxis left
-meanNetTE_sigma_Itot = mean(NetTE_sigma_Itot);
-stdNetTE_sigma_Itot = std(NetTE_sigma_Itot);
+meanNetTE_sigma_Itot = mean(NetTE_sigma_Itotdot);
+stdNetTE_sigma_Itot = std(NetTE_sigma_Itotdot);
 h8 = plot(TErange,meanNetTE_sigma_Itot,'-b');
 hold on
 boundedline(TErange,meanNetTE_sigma_Itot,stdNetTE_sigma_Itot, '-b','alpha','linewidth',1.2);
 
-meanNetTE_kappa_Itot = mean(NetTE_kappa_Itot);
-stdNetTE_kappa_Itot = std(NetTE_kappa_Itot);
+meanNetTE_kappa_Itot = mean(NetTE_kappa_Itotdot);
+stdNetTE_kappa_Itot = std(NetTE_kappa_Itotdot);
 h9 = plot(TErange,meanNetTE_kappa_Itot,'-c');
 hold on
 boundedline(TErange,meanNetTE_kappa_Itot,stdNetTE_kappa_Itot, '-c','alpha','linewidth',1.2);
@@ -216,8 +219,8 @@ h6 = plot(TErange,meanNetTE_sigma_Itot,'linewidth',1.2);
 c = get(h6,'Color');
 boundedline(TErange,meanNetTE_sigma_Itot,stdNetTE_sigma_Itot,'Color', c,'alpha','linewidth',1.2);
 
-meanNetTE_kappa_Itot = mean(NetTE_kappa_Itot);
-stdNetTE_kappa_Itot = std(NetTE_kappa_Itot);
+meanNetTE_kappa_Itot = mean(NetTE_kappa_Itotdot);
+stdNetTE_kappa_Itot = std(NetTE_kappa_Itotdot);
 
 h7 = plot(TErange,meanNetTE_kappa_Itot,'linewidth',1.2);
 c = get(h7,'Color');

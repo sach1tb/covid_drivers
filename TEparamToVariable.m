@@ -14,8 +14,9 @@ dxk = diff(sigmaPoints,1,3);
 
 % windowSizeDays size for TE
 windowSizeDays = 12*7;
+detrendWindow = 56;
 % # of samples from the UKF
-nSigmaPoints = 21;
+nSigmaPoints = 49;
 focussedSigmaPoints = ceil(linspace(1,49,nSigmaPoints));
 %CE_Stot_Itotdot_condE = zeros(nSigmaPoints,datasetLength-windowSizeDays); % (CE_X_Y_Z) conditional TE X->Y conditioned on Z
 %CE_Stot_Itotdot_condEm = zeros(nSigmaPoints,datasetLength-windowSizeDays);
@@ -96,13 +97,13 @@ for i =1:nSigmaPoints
     %     alpha = detrend(normalize(squeeze(sigmaPoints(17,j,2:end)))');
     %     kappa = detrend(normalize(squeeze(sigmaPoints(21,j,2:end)))');
 
-    xi2 = detrendInAWindow(normalize(squeeze(sigmaPoints(16,j,2:end)))',windowSizeDays);
-    xi1 = detrendInAWindow(normalize(squeeze(sigmaPoints(15,j,2:end)))',windowSizeDays);
-    phi1 = detrendInAWindow(normalize(squeeze(sigmaPoints(18,j,2:end)))',windowSizeDays);
-    phi2 = detrendInAWindow(normalize(squeeze(sigmaPoints(19,j,2:end)))',windowSizeDays);
-    sigma = detrendInAWindow(normalize(squeeze(sigmaPoints(20,j,2:end)))',windowSizeDays);
-    alpha = detrendInAWindow(normalize(squeeze(sigmaPoints(17,j,2:end)))',windowSizeDays);
-    kappa = detrendInAWindow(normalize(squeeze(sigmaPoints(21,j,2:end)))',windowSizeDays);
+    xi2 = detrendInAWindow(normalize(squeeze(sigmaPoints(16,j,2:end)))',detrendWindow);
+    xi1 = detrendInAWindow(normalize(squeeze(sigmaPoints(15,j,2:end)))',detrendWindow);
+    phi1 = detrendInAWindow(normalize(squeeze(sigmaPoints(18,j,2:end)))',detrendWindow);
+    phi2 = detrendInAWindow(normalize(squeeze(sigmaPoints(19,j,2:end)))',detrendWindow);
+    sigma = detrendInAWindow(normalize(squeeze(sigmaPoints(20,j,2:end)))',detrendWindow);
+    alpha = detrendInAWindow(normalize(squeeze(sigmaPoints(17,j,2:end)))',detrendWindow);
+    kappa = detrendInAWindow(normalize(squeeze(sigmaPoints(21,j,2:end)))',detrendWindow);
 
     Itotdot_tedata(i,:)=Itotdot;
     xi2_tedata(i,:)=xi2;
@@ -191,7 +192,7 @@ for i =1:nSigmaPoints
     end
 
 end
-save(sprintf('allTEcal_win%d.mat',windowSizeDays ));
+save(sprintf('allTEcal_win%d_detrend%d.mat',windowSizeDays,detrendWindow ));
 % str = sprintf("teData_winSize%d.mat",windowSizeDays);
 % save(str,"windowSizeDays",'Hy', 'TE_phi1_Itotdot', 'TE_Itotdot_phi1', 'NetTE_phi1_Itotdot', ...
 %                           'TE_xi2_Itotdot', 'TE_Itotdot_xi2', 'NetTE_xi2_Itotdot', ...
