@@ -84,7 +84,7 @@ end
 
 function plotTE1(rise,fall)
 close all
-load('allTECal_win84.mat');
+load('allTEcal_win84_detrend35.mat');
 infectious = csvread('data/infectiousIllinois_ci.csv');
 infectious=infectious(1:1002,2);
 infectious(isnan(infectious))=0;

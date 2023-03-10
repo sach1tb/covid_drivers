@@ -2,7 +2,7 @@
 clearvars
 close all
 
-load allTECal_win84.mat  %size is 24, 24*2+1
+load allTEcal_win84_detrend35.mat  %size is 24, 24*2+1
 %% sigma points plot
 subplot(3,3,1)
 plot(phi1_tedata(2:end,:)', 'color', [0 0 0] + 0.5*(1 - [0 0 0]), 'linewidth', .5)
