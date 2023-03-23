@@ -67,7 +67,7 @@ for ii=1:numel(rise_params)
             hold on;
             plot([Ip2Itotdot,Ip2Itotdot], [0,1], 'r-', 'linewidth', 2);
             plot([Isup(idx(1)),Isup(idx(1))], [0,1], 'k:', 'linewidth', 2);
-            xlabel(['I($' param_label '$;$\dot{I}$) (bits)'], 'interpreter', 'latex');
+            xlabel(['I($\dot{I};' param_label '$) (bits)'], 'interpreter', 'latex');
             ylabel('p');
             if jj<4
             title(sprintf('rise %d', rr));
@@ -110,7 +110,7 @@ for ii=1:numel(fall_params)
             
             plot([Ip2Itotdot,Ip2Itotdot], [0,1], 'g-', 'linewidth', 2);
             plot([Isup(idx(1)),Isup(idx(1))], [0,1], 'k:', 'linewidth', 2);
-            xlabel(['I($' param_label '$;$\dot{I}$) (bits)'], 'interpreter', 'latex');
+            xlabel(['I($\dot{I};' param_label '$) (bits)'], 'interpreter', 'latex');
             ylabel('p');
             if jj<4
             title(sprintf('fall %d', ff));
