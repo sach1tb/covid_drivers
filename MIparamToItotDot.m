@@ -51,7 +51,7 @@ for ii=1:numel(rise_params)
     end
     for rr=1:size(rise,1)
         win=rise(rr,1):rise(rr,2);
-        [Ip2Itotdot, pIshuffle, Isup, Ip2shuffle]=emi_with_shuffle(param(win),Itotdot(win), nshuffle, [], ...
+        [Ip2Itotdot, pIshuffle, Isup, Ip2shuffle]=emi_with_shuffle(Itotdot(win), param(win),nshuffle, [], ...
                         [], 1, 0);
 
         if debug
@@ -95,7 +95,7 @@ for ii=1:numel(fall_params)
     end
     for ff=1:size(fall,1)
         win=fall(ff,1):fall(ff,2);
-        [Ip2Itotdot, pIshuffle, Isup, Ip2shuffle]=emi_with_shuffle(param(win),Itotdot(win), nshuffle, [], ...
+        [Ip2Itotdot, pIshuffle, Isup, Ip2shuffle]=emi_with_shuffle(Itotdot(win), param(win),nshuffle, [], ...
                         [], 1, 0);
 
         if debug

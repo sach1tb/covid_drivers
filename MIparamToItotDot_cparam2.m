@@ -49,7 +49,7 @@ for ii=1:numel(rise_params)
             
             for rr=1:size(rise,1)
                 win=rise(rr,1):rise(rr,2);
-                [Ip2Itotdotcparam, pIshuffle, Isup, Ip2shufflecparam]=ecmi_with_shuffle(param(win),Itotdot(win), param2(win), nshuffle, [], ...
+                [Ip2Itotdotcparam, pIshuffle, Isup, Ip2shufflecparam]=ecmi_with_shuffle(Itotdot(win), param(win),param2(win), nshuffle, [], ...
                     [], 1, 0);
                 
                 if debug
@@ -60,12 +60,16 @@ for ii=1:numel(rise_params)
                     
                     % one-tailed test visual with alpha
                     cpI=cumsum(pIshuffle);
-                    idx=find(cpI>1-alpha);
+                    idxu=find(cpI>1-alpha/2);
+                    idxl=find(cpI<alpha/2);
                     
                     hold on;
                     plot([Ip2Itotdotcparam,Ip2Itotdotcparam], [0,1], 'r-', 'linewidth', 2);
-                    plot([Isup(idx(1)),Isup(idx(1))], [0,1], 'k:', 'linewidth', 2);
-                    xlabel(['I($' param_label ';\dot{I}|', param2_label, '$) (bits)'], 'interpreter', 'latex');
+                    plot([Isup(idxu(1)),Isup(idxu(1))], [0,1], 'k:', 'linewidth', 2);
+                    if ~isempty(idxl)
+                        plot([Isup(idxl(1)),Isup(idxl(1))], [0,1], 'k:', 'linewidth', 2);
+                    end
+                    xlabel(['I($', '\dot{I}',';', param_label , '|' , param2_label, '$) (bits)'], 'interpreter', 'latex');
                     ylabel('p');
                     if jj<4
                     title(sprintf('rise %d', rr));
@@ -94,7 +98,7 @@ for ii=1:numel(fall_params)
             
             for ff=1:size(fall,1)
                 win=fall(ff,1):fall(ff,2);
-                [Ip2Itotdotcparam, pIshuffle, Isup, Ip2shufflecparam]=ecmi_with_shuffle(param(win),Itotdot(win), param2(win), nshuffle, [], ...
+                [Ip2Itotdotcparam, pIshuffle, Isup, Ip2shufflecparam]=ecmi_with_shuffle(Itotdot(win),param(win), param2(win), nshuffle, [], ...
                     [], 1, 0);
                 
                 if debug
@@ -105,12 +109,16 @@ for ii=1:numel(fall_params)
                     
                     % one-tailed test visual with alpha
                     cpI=cumsum(pIshuffle);
-                    idx=find(cpI>1-alpha);
+                    idxu=find(cpI>1-alpha/2);
+                    idxl=find(cpI<alpha/2);
                     
                     hold on;
                     plot([Ip2Itotdotcparam,Ip2Itotdotcparam], [0,1], 'g-', 'linewidth', 2);
-                    plot([Isup(idx(1)),Isup(idx(1))], [0,1], 'k:', 'linewidth', 2);
-                    xlabel(['I($' param_label ';\dot{I}|', param2_label, '$) (bits)'], 'interpreter', 'latex');
+                    plot([Isup(idxu(1)),Isup(idxu(1))], [0,1], 'k:', 'linewidth', 2);
+                    if ~isempty(idxl)
+                        plot([Isup(idxl(1)),Isup(idxl(1))], [0,1], 'k:', 'linewidth', 2);
+                    end
+                    xlabel(['I($', '\dot{I}',';', param_label , '|' , param2_label, '$) (bits)'], 'interpreter', 'latex');
                     ylabel('p');
                     if jj<4
                     title(sprintf('fall %d', ff));
