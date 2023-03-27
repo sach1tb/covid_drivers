@@ -13,15 +13,15 @@ debug=1;
 rise = [201, 279;
         627, 694;
         775, 891];
-rise_params_labels={'\xi_1', '\phi_2', '\sigma', '\kappa'};
-rise_params=[15,19,20,21];     
+rise_params_labels={'\xi_2', '\phi_2', '\sigma', '\kappa'};
+rise_params=[16,19,20,21];     
 
 %fall
 fall = [280, 376;
         694, 761;
         892, 958 ];
-fall_params_labels={'\xi_2', '\alpha','\phi_1'};
-fall_params=[16,17,18];      
+fall_params_labels={'\xi_1', '\alpha','\phi_1'};
+fall_params=[15,17,18];      
 
 nshuffle=10000;
 

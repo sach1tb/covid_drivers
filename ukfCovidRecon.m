@@ -73,7 +73,7 @@ parameterInit = [beta0,xi10,xi20 ...
 
 % sigma limits for constrained ukf
 sigmaLimitsMax = [1e7*ones(1,nc), 1 1 1 1 1 1 1 1 0.2 1 0.25];
-sigmaLimitsMin = [0*ones(1,nc), 0.3 0*ones(1,np-1)]+eps;
+sigmaLimitsMin = [0*ones(1,nc), 0.3 0*ones(1,np-1)]+1e-12;
 
 Q=diag([1e-6*ones(1,nc), 0.1^2*beta0, 0.1^2*xi10, 0.1^2*xi20 ...
     0.1^2*alpha0,0.1^2*phi10,0.1^2*phi20,0.1^2*sigma0,0.1^2*kappa0, ...
@@ -168,17 +168,17 @@ for k=1:T
     % https://www.cdc.gov/media/releases/2021/s0818-covid-19-booster-sho ts.html.
     if k>240
         if vax(k-240)<1 
-            sigmaLimitsMax(7+nc)=eps;
+            sigmaLimitsMax(7+nc)=1e-10;
         else
             sigmaLimitsMax(7+nc)=1;
         end
     else
-        sigmaLimitsMax(7+nc)=eps;
+        sigmaLimitsMax(7+nc)=1e-10;
     end
     % only let kappa grow after 240 days assuming first person infected
     % loses immunity
     if k<240
-        sigmaLimitsMax(8+nc)=eps;
+        sigmaLimitsMax(8+nc)=1e-10;
     else
         sigmaLimitsMax(8+nc)=1;
     end
@@ -208,7 +208,7 @@ end
 
 save('ukfOutput.mat','sigmaPointAccumulutor','covarianceMatrix','xV', ...
                     'infectious', 'death', 'vax', 'mask', 'mobility', ...
-                    'popDays', 'T', 'nc', 'np','s');
+                    'popDays', 'T', 'pmat', 'nc', 'np','s');
 
 
 %% plot results

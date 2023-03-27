@@ -34,7 +34,7 @@ phi_Sm = phi1;
 phi_Em = phi1;
 phi_Im = phi1;
 
-%un
+% unmasking
 phi_S = phi2;
 phi_E = phi2;
 phi_I = phi2;
@@ -49,7 +49,7 @@ kappa_Rm= kappa0*Sm/(S+Sh+Sm);
 kappa_Rh= kappa0*Sh/(S+Sh+Sm);
 
 
-n = 1000;
+n = 1440;
 Dt = dt/n;
 
 
