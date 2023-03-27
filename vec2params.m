@@ -3,8 +3,8 @@ function [  beta, xi1, xi2, alpha, ...
             mu, gamma, epsilon]=vec2params(vec)
 
 beta = vec(1); %14
-xi2  = vec(2); %15
-xi1  = vec(3); %16
+xi1  = vec(2); %15
+xi2  = vec(3); %16
 
 % xi_Sh = vec(2);
 % xi_Eh = vec(2);
