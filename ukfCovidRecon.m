@@ -57,10 +57,10 @@ alpha0 = 0.001;  % Vaccination rate [Maged2022]
 
 % next 4 are simply small to begin with represent 10% rate of movement on
 % either side
-phi10 = 0.1; % S -> S_m 
-phi20 = 0.1;  % S_m -> S
-xi20 = 0.1; % S -> S_h
-xi10 = 0.1;  % S_h -> S
+phi10 = 0.1; % S -> S_m % maksing
+phi20 = 0.1;  % S_m -> S % unmasking
+xi10 = 0.1; % S -> S_h % isolation
+xi20 = 0.1;  % S_h -> S % mobility
 
 
 % initial estimate
@@ -75,7 +75,7 @@ parameterInit = [beta0,xi20,xi10 ...
 sigmaLimitsMax = [1e7*ones(1,nc), 1 1 1 1 1 1 1 1 0.2 1 0.25];
 sigmaLimitsMin = [0*ones(1,nc), 0.3 0*ones(1,np-1)]+eps;
 
-Q=diag([1e-6*ones(1,nc), 0.1^2*beta0, 0.1^2*xi20,0.1^2*xi10 ...
+Q=diag([1e-6*ones(1,nc), 0.1^2*beta0, 0.1^2*xi20, 0.1^2*xi10 ...
     0.1^2*alpha0,0.1^2*phi10,0.1^2*phi20,0.1^2*sigma0,0.1^2*kappa0, ...
     0.1^2*mu0, 0.1^2*gamma0, 0.1^2*epsilon0]); % covariance of process
 f=@(x) seirDynamics(x,eta_Ih0,eta_Im0,eta_Sm0,eta_Sh0,dt);  % nonlinear state equations
@@ -162,7 +162,10 @@ for k=1:T
     % z(5) = -100*(xk(3)+xk(6)+xk(9))/totPop; % Mobility
     % z(6) = totPop; % population
     % only let sigma increase if 240 days have passed since vaccination started
-    % 240 days from Truszkowska, revax, supplementary
+    % 240 days from Truszkowska, revax, supplementary, (254-14, or 284-44)
+    % Centers for Disease Control and Prevention. Joint statement from HHS public health and medical 
+    % experts on COVID-19 booster shots; 2021. Available from: 
+    % https://www.cdc.gov/media/releases/2021/s0818-covid-19-booster-sho ts.html.
     if k>240
         if vax(k-240)<1 
             sigmaLimitsMax(7+nc)=eps;
@@ -346,8 +349,8 @@ title('Total population')
 figure(2); gcf; clf;
 
 
-legendStr={"\beta", "\xi_1 (mobility)"  ...
-    , "\xi_2 (isolation)", "\alpha (vaccination)", "\phi_1 (masking)", ...
+legendStr={"\beta", "\xi_2 (mobility)"  ...
+    , "\xi_1 (isolation)", "\alpha (vaccination)", "\phi_1 (masking)", ...
     "\phi_2 (unmasking)", "\sigma (loss of imm, post vacc.)",  ...
     "\kappa (loss of imm, post sick.)", "\mu (mortality)", "\gamma (recovery)", "\epsilon (incubation)"};
 

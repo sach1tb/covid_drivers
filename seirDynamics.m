@@ -19,18 +19,22 @@ V = xk(13);
             phi1, phi2, sigma0, kappa0, ...
             mu, gamma, epsilon]=vec2params(xk(14:end));
 
-xi_Sh = xi2;
-xi_Eh = xi2;
-xi_Ih = xi2;
+% isolation
+xi_Sh = xi1;
+xi_Eh = xi1;
+xi_Ih = xi1;
 
-xi_S = xi1;
-xi_E = xi1;
-xi_I = xi1;
+% mobility
+xi_S = xi2;
+xi_E = xi2;
+xi_I = xi2;
 
+% masking
 phi_Sm = phi1;
 phi_Em = phi1;
 phi_Im = phi1;
 
+%un
 phi_S = phi2;
 phi_E = phi2;
 phi_I = phi2;
