@@ -1,4 +1,4 @@
-function [x,P,Xnext]=ukfConstrained(fstate,x,P,hmeas,z,Q,R,sigmaLimitsMin,sigmaLimitsMax)
+function [x,P,Xsigma]=ukfConstrained(fstate,x,P,hmeas,z,Q,R,sigmaLimitsMin,sigmaLimitsMax)
 % UKF   Unscented Kalman Filter for nonlinear dynamic systems
 % [x, P] = ukf(f,x,P,h,z,Q,R) returns state estimate, x and state covariance, P
 % for nonlinear dynamic system (for simplicity, noises are assumed as additive):
@@ -68,20 +68,28 @@ c=sqrt(c);
 % catch
 %     P=nearestSPD(P); % ideally this should go
 % end
+
 X=sigmas(x,P,c);                            %sigma points around x
 X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax);          % constrain
-
 [x1,X1,P1,X2]=ut(fstate,X,Wm,Wc,L,Q);          %unscented transformation of process
 
-X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax);          % constrain
+
+% try 
+%     chol(P1);
+% catch
+%     P1=nearestSPD(P1); % ideally this should go
+% end
+% 
 % X1=sigmas(x1,P1,c);                         %sigma points around x1
+X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax);          % constrainZ
 % X2=X1-x1(:,ones(1,size(X1,2)));             %deviation of X1
 [z1,Z1,P2,Z2]=ut(hmeas,X1,Wm,Wc,m,R);       %unscented transformation of measurements
 P12=X2*diag(Wc)*Z2';                        %transformed cross-covariance
 K=P12/P2; %*inv(P2);
 x=x1+K*(z-z1);                              %state update
 P=P1-K*P12';                                %covariance update
-Xnext = X1;
+% Xnext = X1;
+Xsigma=sigmas(x,P,c); 
 
 function [y,Y,P,Y1]=ut(f,X,Wm,Wc,n,R)
         %Unscented Transformation
@@ -124,20 +132,28 @@ X = [x Y+A Y-A];
 
 end
 
-function Xnext = migrationLimit(Xprev,Xnext,sigmaMigrationLimit,sigmaStart)
-[len, npoints] = size(Xprev);
+function X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax)
+[~, npoints] = size(X);
 
 
 % Apply constraints
-for i = sigmaStart:len
+% for i = 1:len
+%     for k = 1:npoints
+%         if X(i,k) < sigmaLimitsMin(i)
+%             X(i,k) = sigmaLimitsMin(i);
+%         elseif X(i,k) > sigmaLimitsMax(i)
+%             X(i,k)  = sigmaLimitsMax(i);
+%         end
+%     end
+% end
+% end
 
-    for k = 1:npoints
-        if abs(Xprev(i,k)-Xnext(i,k))/Xprev(i,k) > sigmaMigrationLimit
-            Xnext(i,k) = Xprev(i,k) + sign(Xprev(i,k)-Xnext(i,k))*sigmaMigrationLimit*Xprev(i,k);
-        else
-            Xnext(i,k)  = Xnext(i,k);
-        end
-    end
-
+% vectorize for speed
+for k=1:npoints
+    idx1=X(:,k)<sigmaLimitsMin';
+    X(idx1,k)=sigmaLimitsMin(idx1);
+    
+    idx2=X(:,k)>sigmaLimitsMax';
+    X(idx2,k)=sigmaLimitsMax(idx2);
 end
 end

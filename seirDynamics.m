@@ -49,7 +49,7 @@ kappa_Rm= kappa0*Sm/(S+Sh+Sm);
 kappa_Rh= kappa0*Sh/(S+Sh+Sm);
 
 
-n = 1440;
+n = 1000;
 Dt = dt/n;
 
 

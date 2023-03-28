@@ -168,17 +168,17 @@ for k=1:T
     % https://www.cdc.gov/media/releases/2021/s0818-covid-19-booster-sho ts.html.
     if k>240
         if vax(k-240)<1 
-            sigmaLimitsMax(7+nc)=1e-10;
+            sigmaLimitsMax(7+nc)=0;
         else
             sigmaLimitsMax(7+nc)=1;
         end
     else
-        sigmaLimitsMax(7+nc)=1e-10;
+        sigmaLimitsMax(7+nc)=0;
     end
     % only let kappa grow after 240 days assuming first person infected
     % loses immunity
     if k<240
-        sigmaLimitsMax(8+nc)=1e-10;
+        sigmaLimitsMax(8+nc)=0;
     else
         sigmaLimitsMax(8+nc)=1;
     end
@@ -216,7 +216,7 @@ load('ukfOutput.mat');
 startDate = datenum('02-04-2020');
 endDate = datenum('11-01-2022');
 dateData = linspace(startDate,endDate,T);
-numberOfXTicks = 5;
+numberOfXTicks = 7;
 
 figure(1); gcf; clf;
 
