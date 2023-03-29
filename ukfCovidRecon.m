@@ -11,6 +11,11 @@ m = 6; %number of measurements
 dt = 1;
 ddt= dt; % smaller timestep for stable dynamics
 
+%waves
+waves = [201, 376;
+    627, 761;
+    775, 958];
+
 % covariance of measurement
 %[infectious,death,vax,mask,mobility,Total Population]
 % multipliers: 
@@ -245,11 +250,6 @@ ylabel("Population")
 title('Exposed')
 
 subplot(3,3,3)
-
-%waves
-waves = [201, 376;
-    627, 761;
-    775, 958];
 
 plot(dateData,infectious,'k-','LineWidth',2);
 grid on;

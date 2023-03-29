@@ -74,13 +74,13 @@ X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax);          % constrain
 [x1,X1,P1,X2]=ut(fstate,X,Wm,Wc,L,Q);          %unscented transformation of process
 
 
-% try 
-%     chol(P1);
-% catch
-%     P1=nearestSPD(P1); % ideally this should go
-% end
+try 
+    chol(P1);
+catch
+    P1=nearestSPD(P1); % ideally this should go
+end
 % 
-% X1=sigmas(x1,P1,c);                         %sigma points around x1
+X1=sigmas(x1,P1,c);                         %sigma points around x1
 X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax);          % constrainZ
 % X2=X1-x1(:,ones(1,size(X1,2)));             %deviation of X1
 [z1,Z1,P2,Z2]=ut(hmeas,X1,Wm,Wc,m,R);       %unscented transformation of measurements
@@ -89,6 +89,12 @@ K=P12/P2; %*inv(P2);
 x=x1+K*(z-z1);                              %state update
 P=P1-K*P12';                                %covariance update
 % Xnext = X1;
+
+try 
+    chol(P);
+catch
+    P=nearestSPD(P); % ideally this should go
+end
 Xsigma=sigmas(x,P,c); 
 
 function [y,Y,P,Y1]=ut(f,X,Wm,Wc,n,R)
