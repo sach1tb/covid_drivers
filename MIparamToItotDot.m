@@ -9,6 +9,11 @@ load ukfOutput.mat  %size is 24, 24*2+1
 % debug set to 1 for testing
 debug=1;
 
+% converting to dates
+startDate = datenum('02-04-2020');
+endDate = datenum('11-01-2022');
+dateData = linspace(startDate,endDate,T);
+
 %rise
 rise = [201, 279;
         627, 694;
@@ -20,8 +25,8 @@ rise_params=[16,19,20,21];
 fall = [280, 376;
         694, 761;
         892, 958 ];
-fall_params_labels={'\xi_1', '\alpha','\phi_1'};
-fall_params=[15,17,18];      
+fall_params_labels={'\xi_1', '\phi_1', '\alpha',};
+fall_params=[15,18,17];      
 
 nshuffle=10000;
 
@@ -31,15 +36,7 @@ Itot = sum(xV(7:9,:),1);
 Itotdot=diff(Itot);
 
 
-% smooth all sigma points
-sigmaPointAccumulutor1=sigmaPointAccumulutor*0;
-for ii=1:24
-    for jj=1:49
-        sigmaPointAccumulutor1(ii,jj,:)=sma(sigmaPointAccumulutor(ii,jj,:),7);
-    end
-end
-
-Itot_sigma=squeeze(sum(sigmaPointAccumulutor1(7:9,:,:),1));
+Itot_sigma=squeeze(sum(sigmaPointAccumulutor(7:9,:,:),1));
 Itot_sigma_dot=diff(Itot_sigma,1,2);
 
 % [  beta, xi1, xi2, alpha, ...
@@ -53,7 +50,7 @@ if debug
 end
 for ii=1:numel(rise_params)
     param=xV(rise_params(ii),1:end-1);
-    param_sigma=squeeze(sigmaPointAccumulutor1(rise_params(ii),:,1:end-1));
+    param_sigma=squeeze(sigmaPointAccumulutor(rise_params(ii),:,1:end-1));
     param_label=rise_params_labels{ii};
     % plot the parameter to be doubly sure
     if debug
@@ -78,7 +75,7 @@ for ii=1:numel(rise_params)
                 Ip2sig_dist(aa,bb)=emi_with_shuffle(Itot_X, param_Y, 1, [], [], 1, 0);
             end
         end
-        [Ip2sig_freq, ip2sig_sup]=hist(Ip2sig_dist(:));
+        [Ip2sig_freq, ip2sig_sup]=hist(Ip2sig_dist(:), 0:.1:1);
         pIp2sig=Ip2sig_freq/sum(Ip2sig_freq);
         
         if debug
@@ -101,9 +98,11 @@ for ii=1:numel(rise_params)
             xlabel(['I($\dot{I};' param_label '$) (bits)'], 'interpreter', 'latex');
             ylabel('p');
             if jj<4
-            title(sprintf('rise %d', rr));
+                title(sprintf('rise %d (%s to %s)', rr, ...
+                    datestr(dateData(rise(rr,1))), datestr(dateData(rise(rr,2)))), ...
+                    'fontweight', 'normal');
             end
-            set(gca, 'fontsize', 16, 'xlim', [0 0.35]);
+            set(gca, 'fontsize', 16, 'xlim', [0 1]);
         end            
     end
 end
@@ -134,12 +133,12 @@ for ii=1:numel(fall_params)
         Ip2sig_dist=zeros(49,49);
         for aa=1:49
             for bb=1:49
-                Itot_X=sma(Itot_sigma_dot(aa,win),7);
-                param_Y=sma(param_sigma(bb,win),7);
+                Itot_X=Itot_sigma_dot(aa,win);
+                param_Y=param_sigma(bb,win);
                 Ip2sig_dist(aa,bb)=emi_with_shuffle(Itot_X, param_Y, 1, [], [], 1, 0);
             end
         end
-        [Ip2sig_freq, ip2sig_sup]=hist(Ip2sig_dist(:));
+        [Ip2sig_freq, ip2sig_sup]=hist(Ip2sig_dist(:), 0:.1:1);
         pIp2sig=Ip2sig_freq/sum(Ip2sig_freq);            
                     
         if debug
@@ -160,9 +159,11 @@ for ii=1:numel(fall_params)
             xlabel(['I($\dot{I};' param_label '$) (bits)'], 'interpreter', 'latex');
             ylabel('p');
             if jj<4
-            title(sprintf('fall %d', ff));
+            title(sprintf('fall %d (%s to %s)', ff, ...
+                    datestr(dateData(fall(ff,1))), datestr(dateData(fall(ff,2)))), ...
+                    'fontweight', 'normal');
             end
-            set(gca, 'fontsize', 16, 'xlim', [0 0.6]);
+            set(gca, 'fontsize', 16, 'xlim', [0 1]);
         end            
     end
 end

@@ -13,15 +13,15 @@ debug=1;
 rise = [201, 279;
     627, 694;
     775, 891];
-rise_params_labels={'\xi_1', '\phi_2', '\sigma', '\kappa'};
-rise_params=[15,19,20,21];
+rise_params_labels={'\xi_1', '\phi_1', '\sigma', '\kappa'};
+rise_params=[16,19,20,21];
 
 %fall
 fall = [280, 376;
     694, 761;
     892, 958 ];
-fall_params_labels={'\xi_2', '\alpha','\phi_1'};
-fall_params=[16,17,18];
+fall_params_labels={'\xi_2', '\phi_2', '\alpha'};
+fall_params=[15,18,17];
 
 nshuffle=10000;
 
@@ -86,7 +86,7 @@ end
 %% falls
 for ii=1:numel(fall_params)
     if debug
-        figure(ii); gcf; clf;
+        figure(ii+4); gcf; clf;
         jj=0;
     end
     param=xV(fall_params(ii),1:end-1);
@@ -103,7 +103,7 @@ for ii=1:numel(fall_params)
                 
                 if debug
                     jj=jj+1;
-                    figure(ii); gcf;
+                    figure(ii+4); gcf;
                     subplot(numel(fall_params)-1,3,jj);
                     plot(Isup,pIshuffle, 'k', 'linewidth', 2);
                     

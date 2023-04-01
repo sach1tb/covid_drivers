@@ -63,12 +63,11 @@ Wc=Wm;
 Wc(1)=Wc(1)+(1-alpha^2+beta);               %weights for covariance
 c=sqrt(c);
 
-% try 
-%     chol(P);
-% catch
-%     P=nearestSPD(P); % ideally this should go
-% end
-
+try 
+    chol(P);
+catch
+    P=nearestSPD(P); % ideally this should go
+end
 X=sigmas(x,P,c);                            %sigma points around x
 X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax);          % constrain
 [x1,X1,P1,X2]=ut(fstate,X,Wm,Wc,L,Q);          %unscented transformation of process
@@ -88,7 +87,12 @@ P12=X2*diag(Wc)*Z2';                        %transformed cross-covariance
 K=P12/P2; %*inv(P2);
 x=x1+K*(z-z1);                              %state update
 P=P1-K*P12';                                %covariance update
-% Xnext = X1;
+
+% apply the constraints to the ukf estimate as well
+% Kandepu2008
+% "If UKF estimate violates the constraints, 
+% the same projection technique can be used."
+x=constrainSigma(x,sigmaLimitsMin,sigmaLimitsMax);
 
 try 
     chol(P);
@@ -96,6 +100,10 @@ catch
     P=nearestSPD(P); % ideally this should go
 end
 Xsigma=sigmas(x,P,c); 
+Xsigma=constrainSigma(Xsigma,sigmaLimitsMin,sigmaLimitsMax);
+% recalculate P
+% X3=Xsigma-x(:,ones(1,L));
+% P=X3*diag(Wc)*X3'+0;
 
 function [y,Y,P,Y1]=ut(f,X,Wm,Wc,n,R)
         %Unscented Transformation
