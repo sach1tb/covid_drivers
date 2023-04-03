@@ -13,14 +13,14 @@ debug=1;
 rise = [201, 279;
     627, 694;
     775, 891];
-rise_params_labels={'\xi_1', '\phi_1', '\sigma', '\kappa'};
+rise_params_labels={'\xi_2', '\phi_2', '\sigma', '\kappa'};
 rise_params=[16,19,20,21];
 
 %fall
 fall = [280, 376;
     694, 761;
     892, 958 ];
-fall_params_labels={'\xi_2', '\phi_2', '\alpha'};
+fall_params_labels={'\xi_1', '\phi_1', '\alpha'};
 fall_params=[15,18,17];
 
 nshuffle=10000;
@@ -82,7 +82,7 @@ for ii=1:numel(rise_params)
     end
 end
 
-
+% close all
 %% falls
 for ii=1:numel(fall_params)
     if debug
