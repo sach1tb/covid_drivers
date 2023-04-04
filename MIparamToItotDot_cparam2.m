@@ -25,6 +25,8 @@ fall_params=[15,18,17];
 
 nshuffle=10000;
 
+Isup=-.5:.1:.5; % support for MI
+
 alpha=0.01; % for one-tailed test
 
 Itot = sum(xV(7:9,:),1);
@@ -49,14 +51,15 @@ for ii=1:numel(rise_params)
             
             for rr=1:size(rise,1)
                 win=rise(rr,1):rise(rr,2);
-                [Ip2Itotdotcparam, pIshuffle, Isup, Ip2shufflecparam]=ecmi_with_shuffle(Itotdot(win), param(win),param2(win), nshuffle, [], ...
+                [Ip2Itotdotcparam, pIshuffle, Isup, Ip2shufflecparam]=ecmi_with_shuffle(Itotdot(win), ...
+                    param(win),param2(win), nshuffle, Isup, [], ...
                     [], 1, 0);
                 
                 if debug
                     jj=jj+1;
                     figure(ii); gcf;
                     subplot(numel(rise_params)-1,3,jj);
-                    plot(Isup,pIshuffle, 'k', 'linewidth', 2);
+                    area(Isup,pIshuffle,  'facecolor', 'k', 'facealpha', 0.1);
                     
                     % one-tailed test visual with alpha
                     cpI=cumsum(pIshuffle);
@@ -67,7 +70,7 @@ for ii=1:numel(rise_params)
                     plot([Ip2Itotdotcparam,Ip2Itotdotcparam], [0,1], 'r-', 'linewidth', 2);
                     plot([Isup(idxu(1)),Isup(idxu(1))], [0,1], 'k:', 'linewidth', 2);
                     if ~isempty(idxl)
-                        plot([Isup(idxl(1)),Isup(idxl(1))], [0,1], 'k:', 'linewidth', 2);
+                        plot([Isup(idxl(end)),Isup(idxl(end))], [0,1], 'k:', 'linewidth', 2);
                     end
                     xlabel(['I($', '\dot{I}',';', param_label , '|' , param2_label, '$) (bits)'], 'interpreter', 'latex');
                     ylabel('p');
@@ -98,14 +101,15 @@ for ii=1:numel(fall_params)
             
             for ff=1:size(fall,1)
                 win=fall(ff,1):fall(ff,2);
-                [Ip2Itotdotcparam, pIshuffle, Isup, Ip2shufflecparam]=ecmi_with_shuffle(Itotdot(win),param(win), param2(win), nshuffle, [], ...
-                    [], 1, 0);
+                [Ip2Itotdotcparam, pIshuffle, Isup, Ip2shufflecparam]=ecmi_with_shuffle(Itotdot(win),...
+                            param(win), param2(win), nshuffle, Isup, [], ...
+                            [], 1, 0);
                 
                 if debug
                     jj=jj+1;
                     figure(ii+4); gcf;
                     subplot(numel(fall_params)-1,3,jj);
-                    plot(Isup,pIshuffle, 'k', 'linewidth', 2);
+                    area(Isup,pIshuffle,  'facecolor', 'k', 'facealpha', 0.1);
                     
                     % one-tailed test visual with alpha
                     cpI=cumsum(pIshuffle);
@@ -116,7 +120,7 @@ for ii=1:numel(fall_params)
                     plot([Ip2Itotdotcparam,Ip2Itotdotcparam], [0,1], 'g-', 'linewidth', 2);
                     plot([Isup(idxu(1)),Isup(idxu(1))], [0,1], 'k:', 'linewidth', 2);
                     if ~isempty(idxl)
-                        plot([Isup(idxl(1)),Isup(idxl(1))], [0,1], 'k:', 'linewidth', 2);
+                        plot([Isup(idxl(end)),Isup(idxl(end))], [0,1], 'k:', 'linewidth', 2);
                     end
                     xlabel(['I($', '\dot{I}',';', param_label , '|' , param2_label, '$) (bits)'], 'interpreter', 'latex');
                     ylabel('p');

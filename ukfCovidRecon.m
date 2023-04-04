@@ -462,6 +462,23 @@ set(gca, 'ylim', [0, 15e4]);
 datetick('x','mmm, yy', 'keepticks');
 title('Infectious')
 legend("I","I_m","I_h", 'location','northeastoutside');
+
+
+% plot all sigma points
+figure(4); gcf; clf;
+n=size(sigmaPointAccumulutor,1);
+for ii=1:n
+    subplot(4,6,ii);
+    plot(squeeze(sigmaPointAccumulutor(ii,:,:))', 'color', ones(1,3)*0.75, ...
+            'linewidth', 1);
+    hold on;
+    plot(squeeze(sigmaPointAccumulutor(ii,1,:))', 'k',  ...
+            'linewidth', 2); 
+    if ii> nc
+        title(legendStr{ii-nc});
+    end
+end
+
 %%
 
 

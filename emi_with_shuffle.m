@@ -1,4 +1,4 @@
-function [IXY, pIshuffle, Isup, IXYshuffle]=emi_with_shuffle(X,Y, nshuffle, numberOfBins, ...
+function [IXY, pIshuffle, Isup, IXYshuffle]=emi_with_shuffle(X,Y, nshuffle,Isup, numberOfBins, ...
     support, binarize, nsymbols)
 %
 % X,Y are 1xn, 1-D time series
@@ -36,6 +36,8 @@ if nargin < 1
     binarize=1; 
     nsymbols=0;
     
+    Isup=0:.1:1;
+    
     nshuffle=1000;
 end
 
@@ -63,7 +65,7 @@ for ii=1:nshuffle
     IXYshuffle(1,ii)=emi(X, Y(randperm(numel(Y))), numberOfBins, support);
 end
 
-[freq,Isup]=hist(IXYshuffle,0:.01:.1);
+[freq,Isup]=hist(IXYshuffle,Isup);
 pIshuffle=freq/sum(freq);
 
 if nargin<1 % check if it works

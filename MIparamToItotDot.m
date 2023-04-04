@@ -9,6 +9,8 @@ load ukfOutput.mat  %size is 24, 24*2+1
 % debug set to 1 for testing
 debug=1;
 
+Isup=0:.05:1; % support for MI
+
 % converting to dates
 startDate = datenum('02-04-2020');
 endDate = datenum('11-01-2022');
@@ -63,7 +65,7 @@ for ii=1:numel(rise_params)
         win=rise(rr,1):rise(rr,2);
         
         % calculate I(Idot;param)
-        [Ip2Itotdot, pIshuffle, Isup, Ip2shuffle]=emi_with_shuffle(Itotdot(win), param(win),nshuffle, [], ...
+        [Ip2Itotdot, pIshuffle, Isup, Ip2shuffle]=emi_with_shuffle(Itotdot(win), param(win),nshuffle,Isup, [], ...
                         [], 1, 0);
                     
         % calculate I(Idot(sigma); param(sigma))            
@@ -72,19 +74,19 @@ for ii=1:numel(rise_params)
             for bb=1:49
                 Itot_X=Itot_sigma_dot(aa,win);
                 param_Y=param_sigma(bb,win);
-                Ip2sig_dist(aa,bb)=emi_with_shuffle(Itot_X, param_Y, 1, [], [], 1, 0);
+                Ip2sig_dist(aa,bb)=emi_with_shuffle(Itot_X, param_Y, 1, Isup,[], [], 1, 0);
             end
         end
-        [Ip2sig_freq, ip2sig_sup]=hist(Ip2sig_dist(:), 0:.1:1);
+        [Ip2sig_freq, ip2sig_sup]=hist(Ip2sig_dist(:), Isup);
         pIp2sig=Ip2sig_freq/sum(Ip2sig_freq);
         
         if debug
             jj=jj+1;
             figure(2); gcf;
             subplot(4,3,jj);
-            plot(Isup,pIshuffle, 'k', 'linewidth', 2);
+            area(Isup,pIshuffle,  'facecolor', 'k', 'facealpha', 0.1);
             hold on;
-            plot(ip2sig_sup, pIp2sig, 'r:', 'linewidth', 2);
+            area(ip2sig_sup, pIp2sig, 'facecolor', 'r', 'facealpha', 0.1);
             
             % one-tailed test visual with alpha
             cpI=cumsum(pIshuffle);
@@ -115,6 +117,7 @@ if debug
 end
 for ii=1:numel(fall_params)
     param=xV(fall_params(ii),1:end-1);
+    param_sigma=squeeze(sigmaPointAccumulutor(fall_params(ii),:,1:end-1));
     param_label=fall_params_labels{ii};
     % plot the parameter to be doubly sure
     if debug
@@ -125,7 +128,7 @@ for ii=1:numel(fall_params)
     end
     for ff=1:size(fall,1)
         win=fall(ff,1):fall(ff,2);
-        [Ip2Itotdot, pIshuffle, Isup, Ip2shuffle]=emi_with_shuffle(Itotdot(win), param(win),nshuffle, [], ...
+        [Ip2Itotdot, pIshuffle, Isup, Ip2shuffle]=emi_with_shuffle(Itotdot(win), param(win),nshuffle, Isup, [], ...
                         [], 1, 0);
 
         
@@ -135,19 +138,19 @@ for ii=1:numel(fall_params)
             for bb=1:49
                 Itot_X=Itot_sigma_dot(aa,win);
                 param_Y=param_sigma(bb,win);
-                Ip2sig_dist(aa,bb)=emi_with_shuffle(Itot_X, param_Y, 1, [], [], 1, 0);
+                Ip2sig_dist(aa,bb)=emi_with_shuffle(Itot_X, param_Y, 1, Isup, [], [], 1, 0);
             end
         end
-        [Ip2sig_freq, ip2sig_sup]=hist(Ip2sig_dist(:), 0:.1:1);
+        [Ip2sig_freq, ip2sig_sup]=hist(Ip2sig_dist(:), Isup);
         pIp2sig=Ip2sig_freq/sum(Ip2sig_freq);            
                     
         if debug
             jj=jj+1;
             figure(4); gcf;
             subplot(numel(fall_params),3,jj);
-            plot(Isup,pIshuffle, 'k', 'linewidth', 2);
+            area(Isup,pIshuffle,  'facecolor', 'k', 'facealpha', 0.1);
             hold on;
-            plot(ip2sig_sup, pIp2sig, 'g:', 'linewidth', 2);
+            area(ip2sig_sup, pIp2sig, 'facecolor', 'g', 'facealpha', 0.1);
             % one-tailed test with alpha
             cpI=cumsum(pIshuffle);
             idx=find(cpI>1-alpha);
