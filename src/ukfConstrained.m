@@ -19,10 +19,10 @@ function [x,P,Xsigma]=ukfConstrained(fstate,x,P,hmeas,z,Q,R,sigmaLimitsMin,sigma
 % Example:
 %{
 n=3;      %number of state
-q=0.1;    %std of process 
+q=0.1;    %std of process
 r=0.1;    %std of measurement
 Q=q^2*eye(n); % covariance of process
-R=r^2;        % covariance of measurement  
+R=r^2;        % covariance of measurement
 f=@(x)[x(2);x(3);0.05*x(1)*(x(2)+x(3))];  % nonlinear state equations
 h=@(x)x(1);                               % measurement equation
 s=[0;0;1];                                % initial state
@@ -36,9 +36,9 @@ for k=1:N
   z = h(s) + r*randn;                     % measurments
   sV(:,k)= s;                             % save actual state
   zV(k)  = z;                             % save measurment
-  [x, P] = ukf(f,x,P,h,z,Q,R);            % ekf 
+  [x, P] = ukf(f,x,P,h,z,Q,R);            % ekf
   xV(:,k) = x;                            % save estimate
-  s = f(s) + q*randn(3,1);                % update process 
+  s = f(s) + q*randn(3,1);                % update process
 end
 for k=1:3                                 % plot results
   subplot(3,1,k)
@@ -63,7 +63,7 @@ Wc=Wm;
 Wc(1)=Wc(1)+(1-alpha^2+beta);               %weights for covariance
 c=sqrt(c);
 
-try 
+try
     chol(P);
 catch
     P=nearestSPD(P); % ideally this should go
@@ -73,12 +73,12 @@ X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax);          % constrain
 [x1,X1,P1,X2]=ut(fstate,X,Wm,Wc,L,Q);          %unscented transformation of process
 
 
-try 
+try
     chol(P1);
 catch
     P1=nearestSPD(P1); % ideally this should go
 end
-% 
+%
 X1=sigmas(x1,P1,c);                         %sigma points around x1
 X1 = constrainSigma(X1,sigmaLimitsMin,sigmaLimitsMax);          % constrainZ
 % X2=X1-x1(:,ones(1,size(X1,2)));             %deviation of X1
@@ -90,47 +90,47 @@ P=P1-K*P12';                                %covariance update
 
 % apply the constraints to the ukf estimate as well
 % Kandepu2008
-% "If UKF estimate violates the constraints, 
+% "If UKF estimate violates the constraints,
 % the same projection technique can be used."
 x=constrainSigma(x,sigmaLimitsMin,sigmaLimitsMax);
 
-try 
+try
     chol(P);
 catch
     P=nearestSPD(P); % ideally this should go
 end
-Xsigma=sigmas(x,P,c); 
+Xsigma=sigmas(x,P,c);
 Xsigma=constrainSigma(Xsigma,sigmaLimitsMin,sigmaLimitsMax);
 % recalculate P
 % X3=Xsigma-x(:,ones(1,L));
 % P=X3*diag(Wc)*X3'+0;
 
 function [y,Y,P,Y1]=ut(f,X,Wm,Wc,n,R)
-        %Unscented Transformation
-        %Input:
-        %        f: nonlinear map
-        %        X: sigma points
-        %       Wm: weights for mean
-        %       Wc: weights for covraiance
-        %        n: numer of outputs of f
-        %        R: additive covariance
-        %Output:
-        %        y: transformed mean
-        %        Y: transformed smapling points
-        %        P: transformed covariance
-        %       Y1: transformed deviations
+%Unscented Transformation
+%Input:
+%        f: nonlinear map
+%        X: sigma points
+%       Wm: weights for mean
+%       Wc: weights for covraiance
+%        n: numer of outputs of f
+%        R: additive covariance
+%Output:
+%        y: transformed mean
+%        Y: transformed smapling points
+%        P: transformed covariance
+%       Y1: transformed deviations
 
-        L=size(X,2);
-        y=zeros(n,1);
-        Y=zeros(n,L);
-        for k=1:L
-            Y(:,k)=f(X(:,k));
-            y=y+Wm(k)*Y(:,k);
-        end
-        Y1=Y-y(:,ones(1,L));
-        P=Y1*diag(Wc)*Y1'+R;
-    end
+L=size(X,2);
+y=zeros(n,1);
+Y=zeros(n,L);
+for k=1:L
+    Y(:,k)=f(X(:,k));
+    y=y+Wm(k)*Y(:,k);
 end
+Y1=Y-y(:,ones(1,L));
+P=Y1*diag(Wc)*Y1'+R;
+
+
 function X=sigmas(x,P,c)
 %Sigma points around reference point
 %Inputs:
@@ -144,23 +144,10 @@ A = c*chol(P)';
 Y = x(:,ones(1,numel(x)));
 X = [x Y+A Y-A];
 
-end
+
 
 function X = constrainSigma(X,sigmaLimitsMin,sigmaLimitsMax)
 [~, npoints] = size(X);
-
-
-% Apply constraints
-% for i = 1:len
-%     for k = 1:npoints
-%         if X(i,k) < sigmaLimitsMin(i)
-%             X(i,k) = sigmaLimitsMin(i);
-%         elseif X(i,k) > sigmaLimitsMax(i)
-%             X(i,k)  = sigmaLimitsMax(i);
-%         end
-%     end
-% end
-% end
 
 % vectorize for speed
 for k=1:npoints
@@ -169,5 +156,4 @@ for k=1:npoints
     
     idx2=X(:,k)>sigmaLimitsMax';
     X(idx2,k)=sigmaLimitsMax(idx2);
-end
 end

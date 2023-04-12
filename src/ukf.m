@@ -62,12 +62,8 @@ Wm=[lambda/c 0.5/c+zeros(1,2*L)];           %weights for means
 Wc=Wm;
 Wc(1)=Wc(1)+(1-alpha^2+beta);               %weights for covariance
 c=sqrt(c);
-try
-P=nearestSPD(P); % ideally this should go
+
 X=sigmas(x,P,c);                            %sigma points around x
-catch
-    keyboard
-end
 [x1,X1,P1,X2]=ut(fstate,X,Wm,Wc,L,Q);          %unscented transformation of process
 % X1=sigmas(x1,P1,c);                         %sigma points around x1
 % X2=X1-x1(:,ones(1,size(X1,2)));             %deviation of X1
