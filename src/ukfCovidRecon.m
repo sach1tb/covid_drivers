@@ -77,33 +77,11 @@ mobility = interp1(1:dt:T, mobility, 1:ddt:T);
 normal_wfh=popDays(1)*5.7/100;
 
 % initialize the filter
-%-- fmnincon optimal parameters (taking the first element of each parameter vector)
-% beta0 = modelParams.beta;
-% mu0 = modelParams.mu;
-% epsilon0 = modelParams.epsilon; %1.0 - optimised
-% gamma0 = modelParams.gamma;
-% eta_Ih0 = modelParams.eta_Ih;
-% eta_Im0 = modelParams.eta_Im;
-% eta_Sh0 = modelParams.eta_Sh;
-% eta_Sm0 = modelParams.eta_Sm;
-% kappa0=modelParams.kappa0;
-% sigma0=modelParams.sigma0;
-% alpha0 = modelParams.alpha;
-%
-% phi10 = modelParams.phi1;
-% phi20 = modelParams.phi2;
-% xi20 = modelParams.xi2;
-% xi10 = modelParams.xi1;
-
 
 beta0 = 0.312;  % transmissibility [Maged2022, table 2]
 mu0 = 0.035; % Mortality [Maged2022, table 2]
 epsilon0 = 1.0/4.5; % [Maged2022, pp 5]
 gamma0 = 0.0602; % Rate of recovery, [Maged2022, pp 5]
-eta_Ih0 = 0.99; % decrease in infectivity because of isolation
-eta_Im0 = 0.69; % decrease in infectivity because of masks
-eta_Sh0 = eta_Ih0;  % decrease in susceptibility because of isolation
-eta_Sm0 = eta_Im0/2;  % decrease in susceptibility because of masks
 kappa0 = 1/240; % loss of immunity, initial should be low
 sigma0 = 1/240; % loss of immunity, initial should be low
 alpha0 = 0.00001;  % Vaccination rate [Maged2022 has 0.001 but that doesn't make sense!]
@@ -115,6 +93,11 @@ phi20 = 0.1;  % S_m -> S % unmasking
 xi10 = 0.1; % S -> S_h % isolation
 xi20 = 0.1;  % S_h -> S % mobility
 
+% constant
+eta_Ih0 = 0.99; % decrease in infectivity because of isolation
+eta_Im0 = 0.69; % decrease in infectivity because of masks [Brooks and Butler 2021]
+eta_Sh0 = eta_Ih0;  % decrease in susceptibility because of isolation
+eta_Sm0 = eta_Im0/2;  % decrease in susceptibility because of masks
 
 % initial estimate
 
@@ -193,7 +176,7 @@ for k=1:T
     % 240 days from Truszkowska, revax, supplementary, (254-14, or 284-44)
     % Centers for Disease Control and Prevention. Joint statement from HHS public health and medical 
     % experts on COVID-19 booster shots; 2021. Available from: 
-    % https://www.cdc.gov/media/releases/2021/s0818-covid-19-booster-sho ts.html.
+    % https://www.cdc.gov/media/releases/2021/s0818-covid-19-booster-shots.html.
     
     % don't let people get vaccinated before it actually starts
     % ukf doesn't like this one!!
