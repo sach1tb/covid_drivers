@@ -1,4 +1,4 @@
-function [IXYcZ, pIshuffle, Isup, IXYcZshuffle]=ecmi_with_shuffle(X,Y,Z, nshuffle, Isup, ...
+function [IXYcZ, pIshuffle, Isup, IXYcZshuffle]=ecmi_with_shuffle(X,Y,Z, nshuffle, ...
                     numberOfBins, support, binarize, nsymbols)
 %
 % X,Y,Z are 1xn, 1-D time series
@@ -46,8 +46,6 @@ if nargin < 1
     binarize=1; 
     nsymbols=0;
     
-    Isup=-.1:.05:.3;
-    
     nshuffle=1000;
 end
 
@@ -80,7 +78,7 @@ for ii=1:nshuffle
 
 end
 
-[freq,Isup]=hist(IXYcZshuffle, Isup);
+[freq,Isup]=hist(IXYcZshuffle);
 pIshuffle=freq/sum(freq);
 
 

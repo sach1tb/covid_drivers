@@ -9,8 +9,8 @@ clearvars
 % mobility and mask use taken from reference_YYYY.csv(older set) files.
  
 data2020 = readtable('../data/data_download_file_reference_2020_ILLINOIS_augmented.csv');
- data2021 = readtable('../data/data_download_file_reference_2021_ILLINOIS_augmented.csv');
- data2022 = readtable('../data/data_download_file_reference_2022_ILLINOIS_augmented.csv');
+data2021 = readtable('../data/data_download_file_reference_2021_ILLINOIS_augmented.csv');
+data2022 = readtable('../data/data_download_file_reference_2022_ILLINOIS_augmented.csv');
 
 
 
