@@ -49,6 +49,10 @@ if nargin < 1
     nshuffle=1000;
 end
 
+X=detrend(X);
+Y=detrend(Y);
+Z=detrend(Z);
+
 if binarize
     X=binarize_wrt_median(X);
     Y=binarize_wrt_median(Y);
