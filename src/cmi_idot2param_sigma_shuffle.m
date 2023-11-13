@@ -10,20 +10,18 @@ load ukfOutput.mat  %size is 24, 24*2+1
 debug=1;
 
 %rise
-rise = [201, 279;
-    627, 694;
-    775, 891];
+rise = [203, 272;
+        616, 691;
+        772, 887];
 rise_params_labels={'\xi_2', '\phi_2', '\sigma', '\kappa'};
 rise_params=[16,19,20,21];
 
 %fall
-fall = [280, 376;
-    694, 761;
-    892, 958 ];
-fall_params_labels={'\xi_1', '\phi_1', '\alpha'};
+fall = [272, 383;
+        691, 771;
+        887, 958 ];
+fall_params_labels={'\xi_1', '\phi_1', '\alpha',};
 fall_params=[15,18,17];
-
-nshuffle=10000;
 
 alpha=0.01; % for one-tailed test
 

@@ -263,9 +263,9 @@ dateData = linspace(startDate,endDate,T);
 numberOfXTicks = 7;
 
 % waves
-waves = [201, 376;
-    627, 761;
-    775, 958];
+waves = [202, 382;
+        615, 771;
+        774, 958];
 
 figure(1); gcf; clf;
 
@@ -401,7 +401,7 @@ figure(2); gcf; clf;
 
 
 legendStr={"$\beta$", "$\xi_1$ (isolation)"  ...
-    , "$\xi_2$ (mobility)", "$\alpha$ (vaccination)", "$\phi_1$ (masking)", ...
+    , "$\xi_2$ (non-isolation)", "$\alpha$ (vaccination)", "$\phi_1$ (masking)", ...
     "$\phi_2$ (unmasking)", "$\sigma$ (loss of imm, post vacc.)",  ...
     "$\kappa$ (loss of imm, post sick.)", "$\mu$ (mortality)", "$\gamma$ (recovery)",...
     "$\epsilon$ (incubation)"};
