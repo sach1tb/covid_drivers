@@ -1,9 +1,5 @@
 clearvars
 
-addpath(['boundedline', filesep, 'boundedline'])
-addpath(['boundedline', filesep, 'Inpaint_nans'])
-addpath(['cteUpdatedFiles', filesep])
-
 load ukfOutput.mat  %size is 24, 24*2+1
 
 % debug set to 1 for testing
@@ -61,8 +57,6 @@ Itot_sigma=squeeze(sum(sigmaPointAccumulutor(7:9,:,:),1));
 Itot_sigma_dot=diff(Itot_sigma,1,2);
 
 
-
-load('ukfOutput.mat');
 z = [infectious;death;vax;mask;mobility;popDays];
 
 
