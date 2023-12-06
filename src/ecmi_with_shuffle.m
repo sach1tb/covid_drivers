@@ -9,8 +9,6 @@ function [IXYcZ, pIshuffle, Isup, IXYcZshuffle]=ecmi_with_shuffle(X,Y,Z, nshuffl
 % nsymbols: should be more than 1 to convert time series to symbolic form,
 %           otherwise set to 0
 %
-% NOTE: 
-% 'addpath cteUpdatedFiles/' before running this script
 % 
 % if running without any argument, the script will test with ulam map;
 % may need to run several times since ulam map can diverge

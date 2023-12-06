@@ -10,7 +10,6 @@ function [IXY, pIshuffle, Isup, IXYshuffle]=emi_with_shuffle(X,Y, nshuffle,numbe
 %           otherwise set to 0
 %
 % NOTE: 
-% 'addpath cteUpdatedFiles/' before running this script
 % 
 % if running without any argument, the script will test with ulam map;
 % may need to run several times since ulam map can diverge

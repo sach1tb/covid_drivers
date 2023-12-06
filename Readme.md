@@ -8,9 +8,15 @@ Run in the following order to reproduce the results
 3. mi_idot2param_sigma_shuffle.m: calculates mutual information between idot and parameters with shuffling of sigma points; also plots figures 5, 6, S3 and S4 (run first section and then go to plotting directly to avoid time consuming computations)
 4. cmi_idot2param_sigma_shuffle.m: calculates conditional mutual information and plots supplementary figures S5-S8 and S9-S11 (run first section and then go to plotting directly to avoid time consuming computations)
 
+## test platform
+MATLAB Version: 9.4.0.885841 (R2018a) Update 3
+Operating System: macOS
+
 ## data
 All data is in data folder. 
 
 ## other sources
-boundedline folder is from https://www.mathworks.com/matlabcentral/fileexchange/27485-boundedline-m
+- boundedline is from https://www.mathworks.com/matlabcentral/fileexchange/27485-boundedline-m
+- ukf is a modified version of https://www.mathworks.com/matlabcentral/fileexchange/18217-learning-the-unscented-kalman-filter
+- nearestSPD is from https://www.mathworks.com/matlabcentral/fileexchange/42885-nearestspd
 
