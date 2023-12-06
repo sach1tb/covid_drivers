@@ -113,7 +113,7 @@ for ii=1:numel(rise_params)
 end
 save('mi_rise.mat', 'mi_data_rise');
 
-%% plot
+%% plot Figures S3
 
 load('ukfOutput.mat');
 load('mi_rise.mat');
@@ -148,7 +148,7 @@ for ii=1:numel(rise_params)
 end
 save('mi_rise.mat', 'mi_data_rise')
 
-%% mi
+%% mi (Figure 5)
 load('mi_rise.mat');
 
 figure(3); gcf; clf; jj=0;
@@ -247,7 +247,7 @@ end
 
 save('mi_fall.mat', 'mi_data_fall');
 
-%% plot
+%% plot Figure S4
 
 
 load('ukfOutput.mat');
@@ -283,7 +283,7 @@ for ii=1:numel(fall_params)
 end
 save('mi_fall.mat', 'mi_data_fall');
 
-%% MI
+%% MI (Figure 6)
 load('mi_fall.mat');
 figure(6); gcf; clf; jj=0;
 

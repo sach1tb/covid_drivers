@@ -90,7 +90,7 @@ for ii=1:numel(rise_params) % param1
 end
 save('cmi_rise.mat', 'cmi_data');
 
-%% plot
+%% plot figures S5-S8
 load('cmi_rise.mat');
 for ii=1:numel(rise_params)
     figure(ii); gcf; clf;
@@ -190,7 +190,7 @@ for ii=1:numel(fall_params)
 end
 save('cmi_fall.mat', 'cmi_data_fall');
 
-%% plot
+%% plot figures S9-S11
 load('cmi_fall.mat');
 for ii=1:numel(fall_params)
     figure(ii+4); gcf; clf;

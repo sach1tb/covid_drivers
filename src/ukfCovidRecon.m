@@ -267,6 +267,7 @@ waves = [202, 382;
         615, 771;
         774, 958];
 
+% Figure 3 in paper
 figure(1); gcf; clf;
 
 subplot(3,3,1)
@@ -397,6 +398,7 @@ ylabel("Population")
 xtickangle(30)
 
 
+% Figure 4 in paper
 figure(2); gcf; clf;
 
 
@@ -422,6 +424,7 @@ for ii = 1:np
 end
 
 
+% Figure S1 in supplementary
 
 figure(3); gcf; clf;
 
@@ -473,7 +476,7 @@ hli=legend("$I_{\overline{mh}}$","$I_m$","$I_h$", 'location','northeast');
 set(hli, 'interpreter', 'latex');
 xtickangle(30)
 
-
+% Figure S2 in supplementary
 % plot all sigma points
 legendStr=[ "$S_{\overline{mh}}$", "$S_m$", "$S_h$",  ...
             "$E_{\overline{mh}}$", "$E_m$", "$E_h$", ...
